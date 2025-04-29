@@ -1,0 +1,69 @@
+/* Reset */ 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+      
+  html, body {
+    height: 100%; /* Changed back to 100% */
+    width: 100%;
+    background: white;
+    overflow: hidden;
+    position: relative; /* Added to ensure proper stacking context */
+  }
+      
+  /* Loader container */
+  .loader {
+    position: fixed; /* Changed to fixed to ensure it stays in viewport */
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    z-index: 1000; /* Added to ensure it's above other content */
+  }
+      
+  /* Video sliding animation */
+  .slide-video {
+    position: absolute;
+    top: 0;
+    left: 100%; /* Start off-screen to the right */
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    animation: slideLeft 9s ease forwards;
+    z-index: 1001; /* Ensure video is above black background initially */
+  }
+      
+  /* Black screen overlay */
+  .black-screen {
+    position: absolute;
+    bottom: -100%; /* Start from below the viewport */
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: black;
+    z-index: 1002; /* Ensure black screen is on top during its animation */
+    animation: slideUpBlack 1s ease forwards;
+    animation-delay: 5s; /* Start after video exits */
+  }
+      
+  /* Animations */
+  @keyframes slideLeft {
+    0% {
+      left: 100%; /* Start from right edge */
+    }
+    100% {
+      left: -100%; /* Move completely off-screen to the left */
+    }
+  }
+      
+  @keyframes slideUpBlack {
+    0% {
+      bottom: -100%; /* Start from below */
+    }
+    100% {
+      bottom: 0; /* End at the bottom of the viewport */
+    }
+  }

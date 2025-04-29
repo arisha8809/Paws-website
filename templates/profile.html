@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+</head>
+<body>
+    <h1>Your Profile</h1>
+    
+    <ul>
+        <li><button onclick="alert('Scrapbook feature coming soon!')">Add to Scrapbook</button></li>
+        <li><button onclick="alert('Royal Art feature coming soon!')">Convert Image to Royal</button></li>
+        <li><button onclick="alert('Marketplace coming soon!')">Visit Marketplace</button></li>
+    </ul>
+
+    <button class="back-button" onclick="window.location.href='{{ url_for('home') }}'">Back to Home</button>
+</body>
+</html>

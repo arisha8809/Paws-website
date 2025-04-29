@@ -1,0 +1,107 @@
+/* General Styles */
+body {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    background: black;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Header */
+  header {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+  }
+  
+  .logo {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #d6dbe4;
+  }
+  
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .user-name {
+    font-weight: 500;
+  }
+  
+  /* Logout Button */
+  .logout-btn {
+    background: #d6dbe4;
+    color: black;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .logout-btn:hover {
+    background: #c4c9d4;
+  }
+  
+  /* Main Content */
+  main {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 1s ease;
+  }
+  
+  .welcome-message {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .welcome-message strong {
+    color: #d6dbe4;
+  }
+  
+  .account-type {
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: #333;
+    margin-bottom: 40px;
+    display: inline-block;
+  }
+  
+  /* Optional: Fade-in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

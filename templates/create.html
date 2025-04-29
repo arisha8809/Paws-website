@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paws - Authentication</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="left-side">
+      <video class="dog-video" autoplay muted loop playsinline>
+        <source src="{{ url_for('static', filename='images/dogs-create.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <div class="right-side">
+      <div class="form-content">
+        <!-- Login Page - Default View -->
+        <div class="form-page active" id="login-page">
+          <h1 class="form-title">WELCOME BACK!</h1>
+          <form id="login-form" action="{{ url_for('login') }}" method="POST">
+            <div class="form-item">
+              <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-item">
+              <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="action-button">Login</button>
+          </form>
+          <p class="toggle-link" id="to-profile-type">Don't have an account? Sign up!</p>
+        </div>
+
+        <!-- Profile Type Selection Page -->
+        <div class="form-page slide-right" id="profile-type-page">
+          <h1 class="form-title">Create your profile</h1>
+          <div class="option-buttons">
+            <button class="option-button" id="personal-button">Personal use</button>
+            <button class="option-button" id="seller-button">Shop owner</button>
+          </div>
+          <p class="toggle-link" id="to-login-from-type">Already have an account? Login</p>
+        </div>
+
+        <!-- Personal Profile Creation Page -->
+        <div class="form-page slide-right" id="personal-profile-page">
+          <h1 class="form-title">Create your profile</h1>
+          <form id="personal-form" action="{{ url_for('create_profile', profile_type='personal') }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="profile_type" value="personal">
+            <div class="form-item">
+              <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-item">
+              <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="form-item">
+              <div class="file-upload">
+                <label for="personal-image" class="file-upload-label">Upload image</label>
+                <input type="file" id="personal-image" name="profile_image" accept="image/*">
+                <span class="file-name" id="personal-file-name"></span>
+              </div>
+            </div>
+            <div class="form-item">
+              <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="action-button">Sign up</button>
+          </form>
+        </div>
+
+        <!-- Seller Profile Creation Page -->
+        <div class="form-page slide-right" id="seller-profile-page">
+          <h1 class="form-title">Create your profile</h1>
+          <form id="seller-form" action="{{ url_for('create_profile', profile_type='seller') }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="profile_type" value="seller">
+            <div class="form-item">
+              <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-item">
+              <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="form-item">
+              <input type="text" name="shop_name" placeholder="Shop name" required>
+            </div>
+            <div class="form-item">
+              <div class="file-upload">
+                <label for="seller-image" class="file-upload-label">Upload image</label>
+                <input type="file" id="seller-image" name="profile_image" accept="image/*">
+                <span class="file-name" id="seller-file-name"></span>
+              </div>
+            </div>
+            <div class="form-item">
+              <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="action-button">Sign up</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Update the script section in create.html for the video animation
+const video = document.querySelector('.dog-video');
+video.addEventListener('loadeddata', () => {
+  // Animate the video sliding down from top
+  video.style.animation = 'slideFromLeft 0.8s ease-out forwards';
+});
+
+// Page navigation
+const loginPage = document.getElementById('login-page');
+const profileTypePage = document.getElementById('profile-type-page');
+const personalProfilePage = document.getElementById('personal-profile-page');
+const sellerProfilePage = document.getElementById('seller-profile-page');
+
+// Toggle links
+const toProfileTypeLink = document.getElementById('to-profile-type');
+const toLoginFromTypeLink = document.getElementById('to-login-from-type');
+
+// Profile type buttons
+const personalButton = document.getElementById('personal-button');
+const sellerButton = document.getElementById('seller-button');
+
+// File upload elements
+const personalImageInput = document.getElementById('personal-image');
+const sellerImageInput = document.getElementById('seller-image');
+const personalFileName = document.getElementById('personal-file-name');
+const sellerFileName = document.getElementById('seller-file-name');
+
+// Navigation functions
+function showPage(pageToShow, direction = 'right') {
+  // Hide all pages first
+  const pages = document.querySelectorAll('.form-page');
+  pages.forEach(page => {
+    if (page === pageToShow) {
+      page.classList.remove('slide-left', 'slide-right');
+      page.classList.add('active');
+    } else if (page.classList.contains('active')) {
+      page.classList.remove('active');
+      page.classList.add(direction === 'right' ? 'slide-left' : 'slide-right');
+    } else {
+      page.classList.remove('active');
+      page.classList.add(direction === 'right' ? 'slide-right' : 'slide-left');
+    }
+  });
+}
+
+// Event listeners
+toProfileTypeLink.addEventListener('click', () => {
+  showPage(profileTypePage, 'right');
+});
+
+toLoginFromTypeLink.addEventListener('click', () => {
+  showPage(loginPage, 'left');
+});
+
+personalButton.addEventListener('click', () => {
+  showPage(personalProfilePage, 'right');
+});
+
+sellerButton.addEventListener('click', () => {
+  showPage(sellerProfilePage, 'right');
+});
+
+// File upload handling
+personalImageInput.addEventListener('change', () => {
+  if (personalImageInput.files.length > 0) {
+    personalFileName.textContent = personalImageInput.files[0].name;
+  } else {
+    personalFileName.textContent = '';
+  }
+});
+
+sellerImageInput.addEventListener('change', () => {
+  if (sellerImageInput.files.length > 0) {
+    sellerFileName.textContent = sellerImageInput.files[0].name;
+  } else {
+    sellerFileName.textContent = '';
+  }
+});
+
+// Handle form submission with fetch API
+document.querySelectorAll('form').forEach(form => {
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+      method: this.method,
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+    });
+  });
+});
+  </script>
+</body>
+</html>
