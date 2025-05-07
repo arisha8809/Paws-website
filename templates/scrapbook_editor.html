@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrapbook Editor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&family=Shadows+Into+Light&family=Permanent+Marker&family=Dancing+Script&family=Comic+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Scrapbook Editor Specific Styles */
+        body {
+            background-color: rgb(57, 130, 133);
+            color: black;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .editor-container {
+            display: flex;
+            gap: 20px;
+            height: 80vh;
+            color: black;
+        }
+        
+        .editor-sidebar {
+            width: 280px;
+            padding: 20px;
+            background: blanchedalmond;
+            border-radius: 10px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            border: 1px solid #ffffff;
+        }
+        
+        .editor-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .editor-canvas {
+            flex-grow: 1;
+            background-color: black;
+            border: 1px solid #333;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .scrapbook-page-editor {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-color: #ffffff;
+            background-image: url('static\backgrounds\bg.jpg');
+        }
+        
+        .editor-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: blanchedalmond;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+        
+        .draggable-element {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            transition: box-shadow 0.2s ease;
+            border-radius: 3px;
+        }
+        
+        .draggable-element:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .draggable-element.selected {
+            border: 2px dashed #4a90e2;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .draggable-element.text-element {
+            background-color: transparent;
+            padding: 8px;
+        }
+        
+        .draggable-element.image-element,
+        .draggable-element.sticker-element {
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        /* Paper effect for elements */
+        .paper-effect {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: rotate(var(--rotation));
+            padding: 10px;
+        }
+        
+        .image-paper {
+            padding: 10px;
+            transform: rotate(var(--rotation));
+        }
+        
+        .element-controls {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            display: flex;
+            gap: 5px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 5px;
+            padding: 3px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .element-controls button {
+            width: 24px;
+            height: 24px;
+            padding: 2px;
+            border-radius: 3px;
+            background: #d6dbe4;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .element-controls button:hover {
+            background: #577968;
+        }
+        
+        .draggable-element:hover .element-controls {
+            display: flex;
+        }
+        
+        .context-menu {
+            position: absolute;
+            background: #ffffff;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 5px 0;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .context-menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: white;
+            transition: background 0.2s;
+        }
+        
+        .context-menu-item:hover {
+            background: #224137;
+        }
+        
+        .resize-handle {
+            position: absolute;
+    
+            width: 12px;
+            height: 12px;
+            background-color: #4a90e2;
+            border-radius: 50%;
+            bottom: -6px;
+            right: -6px;
+            cursor: nwse-resize;
+            z-index: 50;
+            display: none;
+        }
+        
+        .draggable-element.selected .resize-handle {
+            display: block;
+        }
+        
+        .page-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .page-controls button {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            background: rgb(20,42,43);
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        
+        .page-controls button:hover {
+            background: rgb(39, 78, 80);
+        }
+        
+        .page-controls button.delete-page {
+            background: #933;
+        }
+        
+        .page-controls button.delete-page:hover {
+            background: #c33;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+            background: rgb(57,130,133);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-section h3 {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+            color: black;
+            font-size: 16px;
+        }
+        
+        .elements-grid, .stickers-grid, .backgrounds-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .element-item, .sticker-item, .background-item {
+            background: rgb(20,42,43);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            border: 1px solid #444;
+            color: white;
+        }
+        
+        .element-item:hover, .sticker-item:hover, .background-item:hover {
+            transform: translateY(-2px);
+            background: rgb(39, 78, 80);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+        
+        .sticker-item img, .background-item img {
+            width: 100%;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 3px;
+        }
+        
+        .form-item {
+            margin-bottom: 15px;
+        }
+        
+        .form-item label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        .form-item input, .form-item select {
+            width: 90%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: rgb(20,42,43);
+            color: white;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        
+        .form-item input[type="color"] {
+            height: 40px;
+            padding: 2px;
+        }
+        
+        /* Text styling controls */
+        .text-style-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .text-style-btn {
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .text-style-btn:hover {
+            background: rgb(39, 78, 80);
+        }
+        
+        .text-style-btn.active {
+            background: #4a90e2;
+            border-color: #2a70c2;
+        }
+        
+        .font-selector {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #333;
+            color: white;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
+        
+        .text-color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border-color: white;
+        }
+        
+        /* Page turn animation */
+        @keyframes turnPageRight {
+            0% { transform: perspective(1200px) rotateY(0); }
+            100% { transform: perspective(1200px) rotateY(-180deg); }
+        }
+        
+        @keyframes turnPageLeft {
+            0% { transform: perspective(1200px) rotateY(0); }
+            100% { transform: perspective(1200px) rotateY(180deg); }
+        }
+        
+        .turning-right {
+            animation: turnPageRight 0.5s ease-in-out;
+            transform-origin: left center;
+        }
+        
+        .turning-left {
+            animation: turnPageLeft 0.5s ease-in-out;
+            transform-origin: right center;
+        }
+        
+        /* Image upload styles */
+        .image-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+            height:100%
+        }
+        
+        .image-upload input[type=file] {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+            cursor: pointer;
+        }
+        
+        .upload-btn {
+            display: block;
+            background: rgb(20,42,43);
+            color: white;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            transition: background 0.3s;
+            margin-top: 10px;
+            border: 1px solid #444;
+        }
+        
+        .upload-btn:hover {
+            background: rgb(39, 78, 80);
+        }
+        
+        /* Back to profile button */
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            color: #ccc;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            background: rgb(20,42,43);
+            transition: all 0.3s ease;
+            border: 1px solid #333;
+        }
+        
+        .back-button:hover {
+            background: rgb(39, 78, 80);
+            color: white;
+        }
+        
+        .option-button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            transition: background 0.2s;
+        }
+        
+        .option-button:hover {
+            background: #2a70c2;
+        }
+        
+        /* Polaroid effect */
+        .polaroid {
+            background: white;
+            padding: 10px 10px 30px 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .tape {
+            position: absolute;
+            width: 40px;
+            height: 15px;
+            background-color: rgba(134, 123, 123, 0.5);
+            transform: rotate(var(--tape-rotation));
+            top: -5px;
+            left: 50%;
+            margin-left: -20px;
+            opacity: 0.7;
+        }
+        
+        /* Cover preview styling */
+        #cover-preview {
+            margin-top: 10px;
+            text-align: center;
+            background: rgb(57, 130, 133);
+            padding: 10px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        #cover-preview img {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('profile', username=session.get('username')) }}" class="back-button">← Back to Profile</a>
+        
+        <div class="editor-container">
+            <!-- Sidebar for tools and elements -->
+            <div class="editor-sidebar">
+                <div class="sidebar-section">
+                    <h3>Scrapbook Settings</h3>
+                    <div class="form-item">
+                        <label for="scrapbook-title">Title:</label>
+                        <input type="text" id="scrapbook-title" value="{{ scrapbook.title if scrapbook else 'My New Scrapbook' }}">
+                    </div>
+                    <div class="form-item">
+                        <label for="scrapbook-cover">Cover Image:</label>
+                        <div class="image-upload">
+                            <div class="upload-btn">Upload Cover Image</div>
+                            <input type="file" id="cover-upload" accept="image/*">
+                        </div>
+                        <div id="cover-preview" style="margin-top: 10px; text-align: center;">
+                            {% if scrapbook and scrapbook.cover_image %}
+                                <img src="{{ scrapbook.cover_image }}" style="max-width: 100%; max-height: 100px; border-radius: 5px;">
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label for="scrapbook-privacy">Privacy:</label>
+                        <select id="scrapbook-privacy">
+                            <option value="private" {% if not scrapbook or scrapbook.privacy == "private" %}selected{% endif %}>Private</option>
+                            <option value="public" {% if scrapbook and scrapbook.privacy == "public" %}selected{% endif %}>Public</option>
+                        </select>
+                    </div>
+                    <button class="option-button" onclick="saveScrapbook()">Save Scrapbook</button>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Add Elements</h3>
+                    <div class="elements-grid">
+                        <div class="element-item" onclick="addElement('text')">
+                            <i class="fas fa-font"></i> Text
+                        </div>
+                        <div class="element-item" onclick="showImageUpload()">
+                            <i class="fas fa-image"></i> Image
+                        </div>
+                    </div>
+                    <div class="image-upload" style="display: none;" id="image-upload-container">
+                        <div class="upload-btn">Upload Image</div>
+                        <input type="file" id="image-upload" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="sidebar-section" id="text-styling-section" style="display: none;">
+                    <h3>Text Styling</h3>
+                    <div class="form-item">
+                        <label for="font-family">Font:</label>
+                        <select id="font-family" class="font-selector" onchange="updateTextStyle('fontFamily', this.value)">
+                            <option value="Arial">Default</option>
+                            <option value="'Shadows Into Light', cursive">Handwritten</option>
+                            <option value="'Permanent Marker', cursive">Marker</option>
+                            <option value="'Dancing Script', cursive">Script</option>
+                            <option value="'Comic Neue', cursive">Comic</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label for="font-size">Size:</label>
+                        <input type="range" id="font-size" min="12" max="48" value="16" onchange="updateTextStyle('fontSize', this.value + 'px')">
+                        <span id="font-size-value">16px</span>
+                    </div>
+                    <div class="form-item">
+                        <label>Style:</label>
+                        <div class="text-style-controls">
+                            <div class="text-style-btn" onclick="toggleTextStyle('fontWeight', 'bold')">
+                                <i class="fas fa-bold"></i>
+                            </div>
+                            <div class="text-style-btn" onclick="toggleTextStyle('fontStyle', 'italic')">
+                                <i class="fas fa-italic"></i>
+                            </div>
+                            <div class="text-style-btn" onclick="toggleTextStyle('textDecoration', 'underline')">
+                                <i class="fas fa-underline"></i>
+                            </div>
+                            <div class="text-style-btn" onclick="updateTextStyle('textAlign', 'left')">
+                                <i class="fas fa-align-left"></i>
+                            </div>
+                            <div class="text-style-btn" onclick="updateTextStyle('textAlign', 'center')">
+                                <i class="fas fa-align-center"></i>
+                            </div>
+                            <div class="text-style-btn" onclick="updateTextStyle('textAlign', 'right')">
+                                <i class="fas fa-align-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label>Text Color:</label>
+                        <div class="text-color-picker">
+                            <div class="color-option" style="background-color: #000000;" onclick="updateTextStyle('color', '#000000')"></div>
+                            <div class="color-option" style="background-color: #e63946;" onclick="updateTextStyle('color', '#e63946')"></div>
+                            <div class="color-option" style="background-color: #2a9d8f;" onclick="updateTextStyle('color', '#2a9d8f')"></div>
+                            <div class="color-option" style="background-color: #e9c46a;" onclick="updateTextStyle('color', '#e9c46a')"></div>
+                            <div class="color-option" style="background-color: #264653;" onclick="updateTextStyle('color', '#264653')"></div>
+                            <div class="color-option" style="background-color: #6a0dad;" onclick="updateTextStyle('color', '#6a0dad')"></div>
+                            <div class="color-option" style="background-color: #4a90e2;" onclick="updateTextStyle('color', '#4a90e2')"></div>
+                            <div class="color-option" style="background-color: #ff9f1c;" onclick="updateTextStyle('color', '#ff9f1c')"></div>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label>Paper Style:</label>
+                        <div class="paper-style-controls">
+                            <input type="checkbox" id="enable-paper-effect" onchange="togglePaperEffect(this.checked)">
+                            <label for="enable-paper-effect">Apply Paper Effect</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Stickers</h3>
+                    <div class="stickers-grid" id="stickers-grid">
+                        <!-- Stickers will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Backgrounds</h3>
+                    <div class="form-item">
+                        <label for="page-background-color">Background Color:</label>
+                        <input type="color" id="page-background-color" value="#fff6dd" onchange="changePageBackground(this.value, 'color')">
+                    </div>
+                    <div class="backgrounds-grid" id="backgrounds-grid">
+                        <!-- Backgrounds will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main editor area -->
+            <div class="editor-main">
+                <div class="editor-controls">
+                    <span>Page: <span id="current-page-number">1</span> / <span id="total-page-number">1</span></span>
+                    <div class="page-controls">
+                        <button onclick="prevPage()">Previous</button>
+                        <button onclick="nextPage()">Next</button>
+                        <button onclick="addPage()">Add Page</button>
+                        <button onclick="deletePage()" class="delete-page">Delete Page</button>
+                    </div>
+                </div>
+                
+                <div class="editor-canvas">
+                    <div id="scrapbook-page-container" class="scrapbook-page-editor">
+                        <!-- Elements will be added here dynamically -->
+                    </div>
+                    <!-- Context menu -->
+                    <div id="context-menu" class="context-menu">
+                        <div class="context-menu-item" onclick="contextMenuAction('bringToFront')">Bring to Front</div>
+                        <div class="context-menu-item" onclick="contextMenuAction('sendToBack')">Send to Back</div>
+                        <div class="context-menu-item" onclick="contextMenuAction('delete')">Delete Element</div>
+                        <div class="context-menu-item" onclick="contextMenuAction('rotate')">Rotate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden input to store scrapbook ID if editing -->
+    <input type="hidden" id="scrapbook-id" value="{{ scrapbook._id if scrapbook else '' }}">
+
+    <script>
+        // Scrapbook data structure
+        let scrapbookData = {
+            _id: document.getElementById("scrapbook-id").value || null,
+            title: document.getElementById("scrapbook-title").value,
+            cover_image: "{{ scrapbook.cover_image if scrapbook and scrapbook.cover_image else '' }}",
+            privacy: document.getElementById("scrapbook-privacy").value,
+            {% if scrapbook %}
+             pages: {{ scrapbook.pages | tojson | safe }}
+            {% else %} 
+            pages: [{"title": "Page 1", "elements": [], "background": {"type": "color", "value": "#fff6dd"}}]
+            {% endif %}
+        };
+        
+        let currentPageIndex = 0;
+        let selectedElementIndex = -1;
+        const pageContainer = document.getElementById("scrapbook-page-container");
+        const contextMenu = document.getElementById("context-menu");
+        let contextMenuTargetIndex = -1;
+        
+        // Available stickers and backgrounds (these would be loaded from your server)
+        const stickers = [
+            '/static/stickers/paw.png',
+            '/static/stickers/sticker2.png',
+            '/static/stickers/sticker3.png',
+            '/static/stickers/sticker4.png',
+            '/static/stickers/sticker5.png',
+            '/static/stickers/tape.png',
+            '/static/stickers/star.png',
+            '/static/stickers/heart.png'
+        ];
+        
+        const backgrounds = [
+            '/static/backgrounds/bg1.jpg',
+            '/static/backgrounds/bg2.jpg',
+            '/static/backgrounds/bg3.jpg',
+            '/static/backgrounds/bg4.jpg',
+            '/static/backgrounds/bg5.jpg',
+            '/static/backgrounds/paper.jpg',
+            '/static/backgrounds/cork.jpg',
+            '/static/backgrounds/craft.jpg'
+        ];
+        
+        // Populate stickers grid
+        function loadStickers() {
+            const stickersGrid = document.getElementById('stickers-grid');
+            stickers.forEach(sticker => {
+                const stickerItem = document.createElement('div');
+                stickerItem.className = 'sticker-item';
+                stickerItem.innerHTML = `<img src="${sticker}" alt="Sticker">`;
+                stickerItem.onclick = () => addSticker(sticker);
+                stickersGrid.appendChild(stickerItem);
+            });
+        }
+        
+        // Populate backgrounds grid
+        function loadBackgrounds() {
+            const backgroundsGrid = document.getElementById('backgrounds-grid');
+            backgrounds.forEach(bg => {
+                const bgItem = document.createElement('div');
+                bgItem.className = 'background-item';
+                bgItem.innerHTML = `<img src="${bg}" alt="Background">`;
+                bgItem.onclick = () => changePageBackground(bg, 'image');
+                backgroundsGrid.appendChild(bgItem);
+            });
+        }
+        
+        // Add a text element to the current page
+        function addElement(type) {
+            const page = scrapbookData.pages[currentPageIndex];
+            const rotation = Math.random() * 6 - 3; // Random rotation between -3 and 3 degrees
+            
+            let newElement = {
+                type: type,
+                content: type === "text" ? "Double-click to edit this text" : "",
+                position: { x: 50 + Math.random() * 50, y: 50 + Math.random() * 50 },
+                size: { width: type === "text" ? 200 : 150, height: type === "text" ? 80 : 150 },
+                zIndex: page.elements.length + 1,
+                rotation: rotation,
+                style: type === "text" ? { 
+                    fontFamily: "Arial", 
+                    fontSize: "16px", 
+                    color: "#000000", 
+                    textAlign: "left",
+                    fontWeight: "normal",
+                    fontStyle: "normal",
+                    textDecoration: "none",
+                    paperEffect: false
+                } : {},
+                effects: {
+                    paperEffect: false,
+                    polaroid: false,
+                    tape: false
+                }
+            };
+            
+            page.elements.push(newElement);
+            renderPage(currentPageIndex);
+            
+            // Select the newly added element
+            selectElement(page.elements.length - 1);
+            
+            // Show text styling if it's a text element
+            if (type === "text") {
+                document.getElementById("text-styling-section").style.display = "block";
+            }
+        }
+        
+        // Add an image element with the uploaded file
+        function addImageElement(imageUrl) {
+            const page = scrapbookData.pages[currentPageIndex];
+            const rotation = Math.random() * 6 - 3; // Random rotation between -3 and 3 degrees
+            
+            let newElement = {
+                type: "image",
+                content: imageUrl,
+                position: { x: 50 + Math.random() * 50, y: 50 + Math.random() * 50 },
+                size: { width: 200, height: 200 },
+                zIndex: page.elements.length + 1,
+                rotation: rotation,
+                effects: {
+                    paperEffect: true,
+                    polaroid: true,
+                    tape: false
+                }
+            };
+            
+            page.elements.push(newElement);
+            renderPage(currentPageIndex);
+            
+            // Select the newly added element
+            selectElement(page.elements.length - 1);
+        }
+        
+        // Add a sticker element to the current page
+        function addSticker(stickerUrl) {
+            const page = scrapbookData.pages[currentPageIndex];
+            const rotation = Math.random() * 10 - 5; // Random rotation between -5 and 5 degrees
+            
+            let newElement = {
+                type: "sticker",
+                content: stickerUrl,
+                position: { x: 100 + Math.random() * 100, y: 100 + Math.random() * 100 },
+                size: { width: 100, height: 100 },
+                zIndex: page.elements.length + 1,
+                rotation: rotation,
+                effects: {}
+            };
+            
+            page.elements.push(newElement);
+            renderPage(currentPageIndex);
+            
+            // Select the newly added element
+            selectElement(page.elements.length - 1);
+        }
+        
+        // Change the background of the current page
+        function changePageBackground(value, type) {
+            scrapbookData.pages[currentPageIndex].background = {
+                type: type,
+                value: value
+            };
+            
+            renderPage(currentPageIndex);
+        }
+        
+        // Render the current page
+        function renderPage(pageIndex) {
+            if (pageIndex < 0 || pageIndex >= scrapbookData.pages.length) return;
+            
+            const page = scrapbookData.pages[pageIndex];
+            pageContainer.innerHTML = '';
+            
+            // Set the background
+            if (page.background) {
+                if (page.background.type === 'color') {
+                    pageContainer.style.backgroundColor = page.background.value;
+                    pageContainer.style.backgroundImage = 'none';
+                } else if (page.background.type === 'image') {
+                    pageContainer.style.backgroundImage = `url(${page.background.value})`;
+                    pageContainer.style.backgroundSize = 'cover';
+                }
+            }
+            
+            // Create and add elements to the page
+            page.elements.forEach((element, index) => {
+                const elementDiv = document.createElement('div');
+                elementDiv.className = `draggable-element ${element.type}-element`;
+                elementDiv.style.left = `${element.position.x}px`;
+                elementDiv.style.top = `${element.position.y}px`;
+                elementDiv.style.width = `${element.size.width}px`;
+                elementDiv.style.height = `${element.size.height}px`;
+                elementDiv.style.zIndex = element.zIndex;
+                elementDiv.style.setProperty('--rotation', `${element.rotation}deg`);
+                
+                // Add element controls
+                const controls = document.createElement('div');
+                controls.className = 'element-controls';
+                controls.innerHTML = `
+                    <button onclick="bringToFront(${index})"><i class="fas fa-arrow-up"></i></button>
+                    <button onclick="sendToBack(${index})"><i class="fas fa-arrow-down"></i></button>
+                    <button onclick="rotateElement(${index})"><i class="fas fa-redo"></i></button>
+                    <button onclick="deleteElement(${index})"><i class="fas fa-trash"></i></button>
+                `;
+                elementDiv.appendChild(controls);
+                
+                // Add resize handle
+                const resizeHandle = document.createElement('div');
+                resizeHandle.className = 'resize-handle';
+                elementDiv.appendChild(resizeHandle);
+                
+                // Set up element based on type
+                if (element.type === 'text') {
+                    elementDiv.innerHTML += `<div contenteditable="true" style="width: 100%; height: 100%; outline: none; 
+                        font-family: ${element.style.fontFamily}; 
+                        font-size: ${element.style.fontSize}; 
+                        color: ${element.style.color};
+                        text-align: ${element.style.textAlign};
+                        font-weight: ${element.style.fontWeight};
+                        font-style: ${element.style.fontStyle};
+                        text-decoration: ${element.style.textDecoration};">${element.content}</div>`;
+                    
+                    if (element.effects && element.effects.paperEffect) {
+                        elementDiv.classList.add('paper-effect');
+                    }
+                    
+                    // Set up text element interaction
+                    const textContent = elementDiv.querySelector('[contenteditable="true"]');
+                    textContent.addEventListener('input', () => {
+                        element.content = textContent.innerHTML;
+                    });
+                    
+                    textContent.addEventListener('focus', () => {
+                        selectElement(index);
+                        document.getElementById("text-styling-section").style.display = "block";
+                    });
+                    
+                } else if (element.type === 'image') {
+                    let imgWrapper = document.createElement('div');
+                    
+                    if (element.effects.polaroid) {
+                        imgWrapper.className = 'polaroid';
+                        elementDiv.style.backgroundColor = 'white';
+                    } else if (element.effects.paperEffect) {
+                        imgWrapper.className = 'image-paper';
+                    }
+                    
+                    imgWrapper.innerHTML = `<img src="${element.content}" alt="User Image" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    elementDiv.appendChild(imgWrapper);
+                    
+                    if (element.effects.tape) {
+                        const tapeDiv = document.createElement('div');
+                        tapeDiv.className = 'tape';
+                        tapeDiv.style.setProperty('--tape-rotation', `${Math.random() * 20 - 10}deg`);
+                        elementDiv.appendChild(tapeDiv);
+                    }
+                    
+                } else if (element.type === 'sticker') {
+                    elementDiv.innerHTML += `<img src="${element.content}" alt="Sticker" style="width: 100%; height: 100%; object-fit: contain;">`;
+                }
+                
+                // Set up event listeners for dragging
+                setupElementDragging(elementDiv, index);
+                
+                // Set up resize functionality
+                setupElementResizing(elementDiv, resizeHandle, index);
+                
+                // Add double click for text editing
+                if (element.type === 'text') {
+                    elementDiv.addEventListener('dblclick', (e) => {
+                        const editableDiv = elementDiv.querySelector('[contenteditable="true"]');
+                        if (editableDiv) {
+                            editableDiv.focus();
+                        }
+                    });
+                }
+                
+                // Add context menu
+                controls.style.display = 'none'; // Initially hide controls
+
+                elementDiv.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    contextMenuTargetIndex = index;
+                    controls.style.display = 'block'; // Show controls on right-click
+                    controls.style.left = `${e.clientX}px`;
+                    controls.style.top = `${e.clientY}px`;
+                });
+                
+                // Add element to page
+                pageContainer.appendChild(elementDiv);
+            });
+            
+            // Update page counter
+            document.getElementById('current-page-number').textContent = currentPageIndex + 1;
+            document.getElementById('total-page-number').textContent = scrapbookData.pages.length;
+        }
+        
+        // Setup dragging for elements
+        function setupElementDragging(element, elementIndex) {
+            let isDragging = false;
+            let offsetX, offsetY;
+            
+            element.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.element-controls')) return;
+                
+                e.preventDefault();
+                isDragging = true;
+                
+                // Select the element
+                selectElement(elementIndex);
+                
+                // Get the current position
+                const rect = element.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                
+                // Add event listeners to handle dragging
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+            });
+            
+            function mouseMoveHandler(e) {
+                if (isDragging) {
+                    // Calculate the new position
+                    const containerRect = pageContainer.getBoundingClientRect();
+                    let newX = e.clientX - containerRect.left - offsetX;
+                    let newY = e.clientY - containerRect.top - offsetY;
+                    
+                    // Update the element's position
+                    element.style.left = `${newX}px`;
+                    element.style.top = `${newY}px`;
+                    
+                    // Update the data model
+                    scrapbookData.pages[currentPageIndex].elements[elementIndex].position = { x: newX, y: newY };
+                }
+            }
+            
+            function mouseUpHandler() {
+                isDragging = false;
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            }
+        }
+        
+        // Setup resizing for elements
+        function setupElementResizing(element, resizeHandle, elementIndex) {
+            let isResizing = false;
+            let originalWidth, originalHeight, originalX, originalY;
+            let startX, startY;
+            
+            resizeHandle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                isResizing = true;
+                
+                const rect = element.getBoundingClientRect();
+                originalWidth = rect.width;
+                originalHeight = rect.height;
+                originalX = rect.left;
+                originalY = rect.top;
+                startX = e.clientX;
+                startY = e.clientY;
+                
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+            });
+            
+            function mouseMoveHandler(e) {
+                if (isResizing) {
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    
+                    const newWidth = Math.max(50, originalWidth + deltaX);
+                    const newHeight = Math.max(50, originalHeight + deltaY);
+                    
+                    element.style.width = `${newWidth}px`;
+                    element.style.height = `${newHeight}px`;
+                    
+                    // Update the data model
+                    scrapbookData.pages[currentPageIndex].elements[elementIndex].size = {
+                        width: newWidth,
+                        height: newHeight
+                    };
+                }
+            }
+            
+            function mouseUpHandler() {
+                isResizing = false;
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            }
+        }
+        
+        // Select an element
+        function selectElement(index) {
+            // Deselect all elements first
+            document.querySelectorAll('.draggable-element').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Select the specified element
+            const elements = document.querySelectorAll('.draggable-element');
+            if (index >= 0 && index < elements.length) {
+                elements[index].classList.add('selected');
+                selectedElementIndex = index;
+                
+                // Show text styling section if it's a text element
+                const currentElement = scrapbookData.pages[currentPageIndex].elements[index];
+                if (currentElement && currentElement.type === 'text') {
+                    document.getElementById('text-styling-section').style.display = 'block';
+                    
+                    // Update text styling controls to match the selected element
+                    updateTextStylingControls(currentElement.style);
+                } else {
+                    document.getElementById('text-styling-section').style.display = 'none';
+                }
+            } else {
+                selectedElementIndex = -1;
+                document.getElementById('text-styling-section').style.display = 'none';
+            }
+        }
+        
+        // Update text styling controls to match the selected element
+        function updateTextStylingControls(style) {
+            // Update font family selector
+            const fontSelector = document.getElementById('font-family');
+            for (let i = 0; i < fontSelector.options.length; i++) {
+                if (fontSelector.options[i].value === style.fontFamily) {
+                    fontSelector.selectedIndex = i;
+                    break;
+                }
+            }
+            
+            // Update font size slider
+            const fontSizeSlider = document.getElementById('font-size');
+            const fontSize = parseInt(style.fontSize);
+            fontSizeSlider.value = fontSize;
+            document.getElementById('font-size-value').textContent = `${fontSize}px`;
+            
+            // Update text style buttons
+            document.querySelectorAll('.text-style-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (style.fontWeight === 'bold') {
+                document.querySelector('.text-style-btn:nth-child(1)').classList.add('active');
+            }
+            
+            if (style.fontStyle === 'italic') {
+                document.querySelector('.text-style-btn:nth-child(2)').classList.add('active');
+            }
+            
+            if (style.textDecoration === 'underline') {
+                document.querySelector('.text-style-btn:nth-child(3)').classList.add('active');
+            }
+            
+            const alignmentIndex = {
+                'left': 4,
+                'center': 5,
+                'right': 6
+            };
+            
+            if (alignmentIndex[style.textAlign]) {
+                document.querySelector(`.text-style-btn:nth-child(${alignmentIndex[style.textAlign]})`).classList.add('active');
+            }
+            
+            // Update color picker
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.style.backgroundColor === style.color) {
+                    option.classList.add('active');
+                }
+            });
+            
+            // Update paper effect checkbox
+            const paperEffectCheckbox = document.getElementById('enable-paper-effect');
+            const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
+            paperEffectCheckbox.checked = currentElement.effects && currentElement.effects.paperEffect;
+        }
+        
+        // Update text styling for the selected element
+        function updateTextStyle(property, value) {
+            if (selectedElementIndex < 0) return;
+            
+            const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
+            if (currentElement && currentElement.type === 'text') {
+                currentElement.style[property] = value;
+                
+                // Update the element in the DOM
+                const textElement = document.querySelectorAll('.draggable-element')[selectedElementIndex];
+                const editableDiv = textElement.querySelector('[contenteditable="true"]');
+                
+                if (editableDiv) {
+                    editableDiv.style[property] = value;
+                }
+                
+                // If it's font size, update the displayed value
+                if (property === 'fontSize') {
+                    document.getElementById('font-size-value').textContent = value;
+                }
+            }
+        }
+        
+        // Toggle text styling properties (bold, italic, underline)
+        function toggleTextStyle(property, value) {
+            if (selectedElementIndex < 0) return;
+            
+            const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
+            if (currentElement && currentElement.type === 'text') {
+                // Toggle the property value
+                const newValue = currentElement.style[property] === value ? 'normal' : value;
+                currentElement.style[property] = newValue;
+                
+                // Update the element in the DOM
+                const textElement = document.querySelectorAll('.draggable-element')[selectedElementIndex];
+                const editableDiv = textElement.querySelector('[contenteditable="true"]');
+                
+                if (editableDiv) {
+                    editableDiv.style[property] = newValue;
+                }
+                
+                // Update styling controls
+                const buttons = document.querySelectorAll('.text-style-btn');
+                let buttonIndex;
+                
+                switch(property) {
+                    case 'fontWeight':
+                        buttonIndex = 0;
+                        break;
+                    case 'fontStyle':
+                        buttonIndex = 1;
+                        break;
+                    case 'textDecoration':
+                        buttonIndex = 2;
+                        break;
+                }
+                
+                if (buttonIndex !== undefined) {
+                    if (newValue === value) {
+                        buttons[buttonIndex].classList.add('active');
+                    } else {
+                        buttons[buttonIndex].classList.remove('active');
+                    }
+                }
+            }
+        }
+        
+        // Toggle paper effect for the selected element
+        function togglePaperEffect(enabled) {
+            if (selectedElementIndex < 0) return;
+            
+            const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
+            if (currentElement) {
+                if (!currentElement.effects) {
+                    currentElement.effects = {};
+                }
+                currentElement.effects.paperEffect = enabled;
+                
+                // Update the DOM
+                const elementDiv = document.querySelectorAll('.draggable-element')[selectedElementIndex];
+                if (enabled) {
+                    elementDiv.classList.add('paper-effect');
+                } else {
+                    elementDiv.classList.remove('paper-effect');
+                }
+            }
+        }
+        
+        // Show context menu at coordinates
+        function showContextMenu(x, y) {
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+            contextMenu.style.display = 'block';
+            
+            // Add click outside listener to hide the menu
+            setTimeout(() => {
+                document.addEventListener('click', hideContextMenu);
+            }, 0);
+        }
+        
+        // Hide context menu
+        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+            document.removeEventListener('click', hideContextMenu);
+        }
+        
+        // Handle context menu actions
+        function contextMenuAction(action) {
+            if (contextMenuTargetIndex < 0) return;
+            
+            switch(action) {
+                case 'bringToFront':
+                    bringToFront(contextMenuTargetIndex);
+                    break;
+                case 'sendToBack':
+                    sendToBack(contextMenuTargetIndex);
+                    break;
+                case 'delete':
+                    deleteElement(contextMenuTargetIndex);
+                    break;
+                case 'rotate':
+                    rotateElement(contextMenuTargetIndex);
+                    break;
+            }
+            
+            hideContextMenu();
+        }
+        
+        // Bring an element to the front
+        function bringToFront(index) {
+            const elements = scrapbookData.pages[currentPageIndex].elements;
+            const maxZIndex = Math.max(...elements.map(e => e.zIndex));
+            elements[index].zIndex = maxZIndex + 1;
+            renderPage(currentPageIndex);
+            selectElement(index);
+        }
+        
+        // Send an element to the back
+        function sendToBack(index) {
+            const elements = scrapbookData.pages[currentPageIndex].elements;
+            const minZIndex = Math.min(...elements.map(e => e.zIndex));
+            elements[index].zIndex = minZIndex - 1;
+            renderPage(currentPageIndex);
+            selectElement(index);
+        }
+        
+        // Delete an element
+        function deleteElement(index) {
+            scrapbookData.pages[currentPageIndex].elements.splice(index, 1);
+            renderPage(currentPageIndex);
+            selectElement(-1);
+        }
+        
+        // Rotate an element
+        function rotateElement(index) {
+            const element = scrapbookData.pages[currentPageIndex].elements[index];
+            element.rotation = (element.rotation || 0) + 15;
+            renderPage(currentPageIndex);
+            selectElement(index);
+        }
+        
+        // Navigate to the previous page
+        function prevPage() {
+            if (currentPageIndex > 0) {
+                pageContainer.classList.add('turning-left');
+                setTimeout(() => {
+                    currentPageIndex--;
+                    renderPage(currentPageIndex);
+                    pageContainer.classList.remove('turning-left');
+                }, 200);
+            }
+        }
+        
+        // Navigate to the next page
+        function nextPage() {
+            if (currentPageIndex < scrapbookData.pages.length - 1) {
+                pageContainer.classList.add('turning-right');
+                setTimeout(() => {
+                    currentPageIndex++;
+                    renderPage(currentPageIndex);
+                    pageContainer.classList.remove('turning-right');
+                }, 200);
+            }
+        }
+        
+        // Add a new page
+        function addPage() {
+            const newPageNumber = scrapbookData.pages.length + 1;
+            scrapbookData.pages.push({
+                title: `Page ${newPageNumber}`,
+                elements: [],
+                background: { type: "color", value: "#fff6dd" }
+            });
+            
+            currentPageIndex = scrapbookData.pages.length - 1;
+            renderPage(currentPageIndex);
+        }
+        
+        // Delete the current page
+        function deletePage() {
+            if (scrapbookData.pages.length <= 1) {
+                alert("Cannot delete the last page.");
+                return;
+            }
+            
+            if (confirm("Are you sure you want to delete this page?")) {
+                scrapbookData.pages.splice(currentPageIndex, 1);
+                
+                if (currentPageIndex >= scrapbookData.pages.length) {
+                    currentPageIndex = scrapbookData.pages.length - 1;
+                }
+                
+                renderPage(currentPageIndex);
+            }
+        }
+        
+        // Show image upload dialog
+        function showImageUpload() {
+            document.getElementById('image-upload-container').style.display = 'block';
+        }
+        
+        // Save scrapbook data to server
+        function saveScrapbook() {
+            // Update title and privacy from form inputs
+            scrapbookData.title = document.getElementById('scrapbook-title').value;
+            scrapbookData.privacy = document.getElementById('scrapbook-privacy').value;
+            
+            // Send the data to server
+            fetch('/api/save-scrapbook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(scrapbookData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the scrapbook ID if it's new
+                    if (data.scrapbook_id) {
+                        document.getElementById('scrapbook-id').value = data.scrapbook_id;
+                        scrapbookData._id = data.scrapbook_id;
+                    }
+                    alert('Scrapbook saved successfully!');
+                } else {
+                    alert('Error saving scrapbook: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the scrapbook.');
+            });
+        }
+        
+        // Initialize the editor
+        function initEditor() {
+            // Initial page render
+            renderPage(currentPageIndex);
+            
+            // Load stickers and backgrounds
+            loadStickers();
+            loadBackgrounds();
+            
+            // Set up event listeners for hiding context menu when clicking elsewhere
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#context-menu') && !e.target.closest('.draggable-element')) {
+                    hideContextMenu();
+                    selectElement(-1);
+                }
+            });
+            
+            // Set up image upload handling
+            document.getElementById('image-upload').addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const formData = new FormData();
+                    formData.append('image', this.files[0]);
+                    
+                    fetch('/api/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // console.log(data)
+                            addImageElement(data.url);
+                            this.value = '';  // Reset the input
+                            document.getElementById('image-upload-container').style.display = 'none';
+                        } else {
+                            alert('Error uploading image: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while uploading the image.');
+                    });
+                }
+            });
+            
+            // Set up cover image upload handling
+            document.getElementById('cover-upload').addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const formData = new FormData();
+                    formData.append('image', this.files[0]);
+                    
+                    fetch('/api/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            scrapbookData.cover_image = data.url;
+                            document.getElementById('cover-preview').innerHTML = `
+                                <img src="${data.url}" style="max-width: 100%; max-height: 100px; border-radius: 5px;">
+                            `;
+                        } else {
+                            alert('Error uploading cover image: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while uploading the cover image.');
+                    });
+                }
+            });
+            
+            // Set up font size slider event
+            document.getElementById('font-size').addEventListener('input', function() {
+                document.getElementById('font-size-value').textContent = `${this.value}px`;
+                updateTextStyle('fontSize', `${this.value}px`);
+            });
+        }
+        
+        // Start the editor on page load
+        window.addEventListener('DOMContentLoaded', initEditor);
+    </script>
+</body>
+</html>

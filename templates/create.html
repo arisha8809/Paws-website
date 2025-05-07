@@ -193,7 +193,12 @@ document.querySelectorAll('form').forEach(form => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        window.location.href = data.redirect;
+      // Animate current page sliding left
+      document.body.style.animation = 'slideOutLeft 0.8s ease-in forwards';
+
+      setTimeout(() => {
+      window.location.href = data.redirect;
+      }, 400); // Wait for animation to finish
       } else {
         alert(data.message);
       }

@@ -9,7 +9,7 @@ html, body {
   height: 100%;
   width: 100%;
   font-family: 'Bricolage Grotesque', sans-serif;
-  background: black;
+  background: rgb(57, 130, 133);
   overflow-x: hidden;
 }
 
@@ -39,13 +39,13 @@ html, body {
 /* Right Side Form */
 .right-side {
   flex: 1;
-  background: black;
+  background: rgb(57, 130, 133);
   display: flex;
   justify-content: center;
   align-items: flex-start; /* Changed from center to flex-start */
   padding: 40px;
   padding-top: 25vh; /* Added padding to move content upward */
-  color: white;
+  color: black;
 }
 
 /* Form Content Styling */
@@ -86,7 +86,7 @@ html, body {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 30px;
-  color: white;
+  color: black;
 }
 
 /* Improved spacing for form elements */
@@ -99,17 +99,17 @@ html, body {
 }
 
 .form-item input {
-  background: #d6dbe4;
+  background: black;
   border: none;
   border-radius: 30px;
   padding: 15px 20px;
   font-size: 1rem;
-  color: #333;
+  color: white;
   font-family: 'Bricolage Grotesque', sans-serif;
 }
 
 .form-item input::placeholder {
-  color: #666;
+  color: white;
 }
 
 .form-item input[type="file"] {
@@ -125,43 +125,42 @@ html, body {
 }
 
 .option-button {
-  background: #d6dbe4;
+  background: black;
   border: none;
   border-radius: 30px;
   padding: 18px 20px;
   font-size: 1rem;
-  color: #333;
+  color: white;
   cursor: pointer;
   font-family: 'Bricolage Grotesque', sans-serif;
   transition: background-color 0.3s, transform 0.2s;
 }
 
 .option-button:hover {
-  background: #c4c9d4;
+  background: rgb(20,42,43);
   transform: scale(1.02);
 }
 
 .action-button {
-  background: #d6dbe4;
+  background: rgb(57, 130, 133);
   border: none;
   border-radius: 30px;
   padding: 15px 30px;
   font-size: 1rem;
-  color: #333;
+  color: black;
   cursor: pointer;
   font-family: 'Bricolage Grotesque', sans-serif;
   align-self: flex-end;
   transition: background-color 0.3s, transform 0.2s;
-  margin-top: 10px;
+  margin-left: 300px;
 }
 
 .action-button:hover {
-  background: #c4c9d4;
+  background: #b8bec9;
   transform: scale(1.02);
 }
-
 .toggle-link {
-  color: #d6dbe4;
+  color: black;
   text-decoration: none;
   font-size: 0.9rem;
   cursor: pointer;
@@ -177,11 +176,11 @@ html, body {
 .file-upload {
   position: relative;
   overflow: hidden;
-  background: #d6dbe4;
+  background: black;
   border-radius: 30px;
   padding: 15px 20px;
-  text-align: center;
-  color: #333;
+  text-align: left;
+  color: white;
   cursor: pointer;
 }
 
@@ -249,4 +248,31 @@ html, body {
   .toggle-link {
     margin-top: 20px;
   }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Optional smooth transition on body */
+body {
+  animation-fill-mode: both;
 }

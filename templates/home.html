@@ -1,169 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Paws - Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
+    body {
+    animation: slideInRight 0.5s ease-out forwards;
+  }
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Bricolage Grotesque', sans-serif;
-      background: black;
+      background: rgb(57, 130, 133);
       color: white;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-    }
-    
-    header {
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      border-bottom: 1px solid #333;
+      position: relative;
+      overflow: hidden;
     }
-    
-    .logo {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #d6dbe4;
+
+    .center-text {
+  font-size: 34vw;
+  font-weight: 800;
+  background-image: url('static/images/fill.jpg');
+  background-size: 1000px auto;
+  background-repeat: repeat-x;
+  background-position: 0 center;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  line-height: 0.9;
+  animation: scrollBackground 10s linear infinite;
+
+  /* Outline the letters for visibility */
+  -webkit-text-stroke: 2px #000000; /* white border */
+  text-stroke: 2px #000000; /* for future browser support */
+}
+
+
+    .fixed-action-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 100;
     }
-    
-    .user-menu {
+
+    .btn-floating {
       display: flex;
+      justify-content: center;
       align-items: center;
-      gap: 20px;
-    }
-    
-    .profile-pic {
-      width: 40px;
-      height: 40px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      object-fit: cover;
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .user-name {
-      font-weight: 500;
-    }
-    
-    .logout-btn {
-      background: #d6dbe4;
-      color: black;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
+      background-color: transparent;
       cursor: pointer;
-      font-family: 'Bricolage Grotesque', sans-serif;
-      font-weight: 500;
-      transition: background-color 0.2s;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.3s ease;
     }
-    
-    .logout-btn:hover {
-      background: #c4c9d4;
-    }
-    
-    main {
-      flex: 1;
-      padding: 40px;
+
+    .fixed-action-btn ul {
+      position: absolute;
+      bottom: 70px;
+      right: 10px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      animation: fadeIn 1s ease;
+      gap: 10px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      list-style: none;
     }
-    
-    .welcome-message {
-      font-size: 2.5rem;
-      margin-bottom: 30px;
-      text-align: center;
+
+    .fixed-action-btn.active ul {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
-    
-    .welcome-message strong {
-      color: #d6dbe4;
+
+    .fixed-action-btn.active .btn-floating {
+      transform: rotate(15deg);
     }
-    
-    .account-type {
-      font-size: 1.2rem;
-      padding: 10px 20px;
+
+    .menu-option {
+      background: blanchedalmond;
+      color: black;
+      padding: 10px 15px;
       border-radius: 20px;
-      background: #333;
-      margin-bottom: 40px;
+      text-decoration: none;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
       display: inline-block;
     }
-    
-    .content-section {
-      width: 100%;
-      max-width: 800px;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
+
+    .menu-option:hover {
+      background: white;
+      transform: scale(1.05);
     }
-    
-    .content-section h2 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      color: #d6dbe4;
+
+    .paw-icon {
+      width: 60px;
+      height: 60px;
+      transition: transform 0.3s ease;
     }
-    
-    .content-section p {
-      line-height: 1.6;
-      margin-bottom: 20px;
+
+    .icons {
+      width: 30px;
+      height: 30px;
+      border-radius: 100%;
     }
-    
+
+    .fab-close-line-length {
+      width: 1.64rem;
+    }
+
+    .fab-close-line-thickness {
+      height: 2px;
+    }
+
+    .fab-close-animation-time {
+      transition-duration: 0.3s;
+    }
+
+    .fixed-action-btn.spin-close .btn-floating {
+      position: sticky;
+    }
+
+    .fixed-action-btn.spin-close .btn-floating .paw-icon {
+      opacity: 1;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .fixed-action-btn.spin-close .btn-floating:before,
+    .fixed-action-btn.spin-close .btn-floating:after {
+      content: ' ';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 1.64rem;
+      height: 2px;
+      background: white;
+      margin-top: -2px;
+      margin-left: -0.82rem;
+      transform: rotate(0);
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .fixed-action-btn.spin-close.active .btn-floating .paw-icon {
+      opacity: 0;
+    }
+
+    .fixed-action-btn.spin-close.active .btn-floating:before {
+      opacity: 1;
+      transform: rotate(45deg);
+    }
+
+    .fixed-action-btn.spin-close.active .btn-floating:after {
+      opacity: 1;
+      transform: rotate(135deg);
+    }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+    /* Add this keyframe animation */
+@keyframes scrollBackground {
+  0% {
+    background-position: 0 center;
+  }
+  100% {
+    background-position: -100% center;
+  }
+}
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
   </style>
 </head>
-<body>
-    <header>
-        <div class="logo">Paws</div>
-        <div class="user-menu">
-          <div class="user-info">
-            <a href="{{ url_for('profile', username=user.username) }}">
-                <img src="{{ user.profile_image|image_url }}" alt="Profile" class="profile-pic">
-            </a>
-            <span class="user-name">{{ user.username }}</span>
-          </div>
-          <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        </div>
-      </header>
-      
-  
-  <main>
-    <h1 class="welcome-message">Welcome to Paws, <strong>{{ user.username }}</strong>!</h1>
-    
-    <div class="account-type">
-      {% if user.profile_type == 'personal' %}
-      Personal Account
-      {% else %}
-      Shop Owner Account
-      {% endif %}
-    </div>
-    
-    <div class="content-section">
-      <h2>Your Dashboard</h2>
-      {% if user.profile_type == 'personal' %}
-      <p>This is your personal Paws account. Here you can discover and shop for pet products from various shops.</p>
-      {% else %}
-      <p>This is your shop owner account. Here you can manage your products and shop settings.</p>
-      {% endif %}
-      <p>The full website functionality is coming soon!</p>
-    </div>
-  </main>
+
+<body class="slide-in">
+  <div class="center-text">PAWS</div>
+
+  <div class="fixed-action-btn spin-close">
+    <a class="btn-floating">
+      <img src="{{ url_for('static', filename='images/paw.png') }}" alt="Menu" class="paw-icon">
+    </a>
+    <ul>
+      <li>
+        <a href="{{ url_for('profile', username=user.username) }}" class="menu-option">
+          <img src="static/images/profile.png" class="icons">
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('marketplace') }}" class="menu-option">
+          <img src="static/images/marketplace.png" class="icons">
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const fab = document.querySelector('.fixed-action-btn');
+      const fabButton = fab.querySelector('.btn-floating');
+
+      fabButton.addEventListener('click', function () {
+        fab.classList.toggle('active');
+      });
+    });
+  </script>
 </body>
 </html>

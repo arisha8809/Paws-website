@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sell Products</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <style>
+        body, html {
+            font-family: 'Roboto Slab', serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(57, 130, 133);
+            color: black;
+        }
+
+        .container {
+            max-width: 1700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h2, h3 {
+            font-family: 'Roboto Slab', serif;
+            margin-top: 0;
+        }
+
+        button {
+            padding: 8px 20px;
+            background-color: rgb(20,42,43);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        button:hover {
+            background-color: rgb(39, 78, 80);
+        }
+
+        .add-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .add-button::before {
+            content: "+";
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 15px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background-color: blanchedalmond;
+            color: black;
+            font-family: 'Roboto Slab', serif;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #444;
+        }
+
+        .form-section, .shop-section, .product-section {
+            background-color: blanchedalmond;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
+            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
+        }
+
+        .form-section:hover, .shop-section:hover, .product-section:hover {
+            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
+            transform: scale(1.02, 1.02);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
+            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
+            background-color: #222;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 350px;
+        }
+
+        .product-card:hover {
+            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05, 1.05);
+        }
+
+        .product-img-container {
+            height: 200px;
+            width: 100%;
+            overflow: hidden;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            position: relative;
+            background-color: #1a1a1a;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.2s all ease-out;
+        }
+
+        .product-card:hover .product-img {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        .product-info {
+            padding: 16px 24px 24px 24px;
+            flex: 1;
+            z-index: 2;
+            background-color: #222;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .product-category {
+            font-family: 'Raleway', sans-serif;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 2px;
+            font-weight: 500;
+            color: #868686;
+        }
+
+        .product-title {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            font-family: 'Roboto Slab', serif;
+            font-size: 1.3rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .product-description {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            font-family: 'Raleway', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #d6dbe4;
+        }
+
+        img.preview {
+            max-width: 150px;
+            margin-top: 10px;
+            display: block;
+            border-radius: 8px;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgb(20,42,43);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: rgb(39, 78, 80);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            margin-top: 0;
+            color: black;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .btn-cancel {
+            background: rgb(20,42,43);
+            color: white;
+        }
+
+        .btn-submit {
+            background: rgb(20,42,43);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: rgb(62, 124, 128);
+        }
+        .btn-cancel:hover {
+            background: rgb(62, 124, 128);
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-top: 30px;
+            color: black;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .back-button:hover {
+            color: white;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        .empty-state-text {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        /* Shop header with image */
+        .shop-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .shop-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #333;
+        }
+
+        .shop-info {
+            flex: 1;
+        }
+
+        .shop-name {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .shop-description {
+            color: #ccc;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .label {
+            font-family: 'Raleway', sans-serif;
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        /* Form group spacing */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* File input styling */
+        .file-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .file-input-label {
+            display: block;
+            background-color: rgb(20,42,43);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .file-input-label:hover {
+            background-color: rgb(62, 124, 128);
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Add product button styling */
+        .add-product-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section-header">
+            <h2>Sell Products</h2>
+        </div>
+
+        {% if not shop %}
+            <div class="form-section" style="text-align:center;">
+                <h3>Start Selling</h3>
+                <p>Create your shop to start selling products on our platform</p>
+                <button class="add-button" id="create-shop-btn">Create Shop</button>
+            </div>
+
+            <!-- Shop Modal -->
+            <div class="modal-overlay" id="shop-modal">
+                <div class="modal-content">
+                    <h3 class="modal-title">Create Your Shop</h3>
+                    <form action="/create_shop" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label class="label" for="shop-name">Shop Name</label>
+                            <input id="shop-name" name="name" placeholder="Enter your shop name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label" for="shop-description">Description</label>
+                            <textarea id="shop-description" name="description" placeholder="Tell customers about your shop" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label">Shop Image</label>
+                            <div class="file-input-container">
+                                <label class="file-input-label" for="shopImageFile">
+                                    Choose Image
+                                </label>
+                                <input type="file" id="shopImageFile" class="file-input" accept="image/*">
+                                <div class="file-name" id="shop-file-name">No file chosen</div>
+                                <p style="font-size: 0.8rem; color: #888;">Maximum image size: 1MB</p>
+                            </div>
+                            <input type="hidden" name="image_url" id="shopImageUrl">
+                            <img id="shopImagePreview" class="preview" style="display: none;">
+                        </div>
+                        
+                        <div class="modal-buttons">
+                            <button type="button" class="btn-cancel" id="cancel-shop-create">Cancel</button>
+                            <button type="submit" class="btn-submit">Create Shop</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="shop-section">
+                <div class="shop-header">
+                    {% if shop.image_url %}
+                        <img src="{{ shop.image_url }}" class="shop-image" alt="{{ shop.name }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default-shop.jpg') }}" class="shop-image" alt="{{ shop.name }}">
+                    {% endif %}
+                    <div class="shop-info">
+                        <h2 class="shop-name">{{ shop.name }}</h2>
+                        <p class="shop-description">{{ shop.description or 'No description available.' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-product-container">
+                <button class="add-button" id="add-product-btn">Add New Product</button>
+            </div>
+
+            <!-- Add Product Modal -->
+            <div class="modal-overlay" id="product-modal">
+                <div class="modal-content">
+                    <h3 class="modal-title">Add New Product</h3>
+                    <form action="/add_product" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label class="label" for="product-name">Product Name</label>
+                            <input id="product-name" name="name" placeholder="Enter product name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label" for="product-description">Description</label>
+                            <textarea id="product-description" name="description" placeholder="Describe your product" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label" for="product-price">Price (₹)</label>
+                            <input id="product-price" name="price" type="number" step="0.01" placeholder="Enter price" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="label">Product Image</label>
+                            <div class="file-input-container">
+                                <label class="file-input-label" for="productImageFile">
+                                    Choose Image
+                                </label>
+                                <input type="file" id="productImageFile" class="file-input" accept="image/*">
+                                <div class="file-name" id="product-file-name">No file chosen</div>
+                                <p style="font-size: 0.8rem; color: #888;">Maximum image size: 1MB</p>
+                            </div>
+                            <input type="hidden" name="image_url" id="productImageUrl">
+                            <img id="productImagePreview" class="preview" style="display: none;">
+                        </div>
+                        
+                        <div class="modal-buttons">
+                            <button type="button" class="btn-cancel" id="cancel-product-add">Cancel</button>
+                            <button type="submit" class="btn-submit">Add Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2>Your Products</h2>
+            </div>
+            
+            {% if products and products|length > 0 %}
+                <div class="product-grid">
+                    {% for product in products %}
+                        <div class="product-card">
+                            <div class="product-img-container">
+                                {% if product.image_url %}
+                                    <img src="{{ product.image_url }}" class="product-img" alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='images/default-product.jpg') }}" class="product-img" alt="{{ product.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <span class="product-category">Product</span>
+                                <h3 class="product-title">{{ product.name }}</h3>
+                                <p class="product-description">
+                                    {{ product.description or 'No description available.' }}
+                                </p>
+                                <div class="product-price">₹{{ product.price }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <p class="empty-state-text">You haven't added any products yet.</p>
+                    <button class="add-button" id="add-product-empty-btn">Add Your First Product</button>
+                </div>
+            {% endif %}
+        {% endif %}
+        
+        <a href="{{ url_for('profile', username=session.get('username', '')) }}" class="back-button">← Back to Profile</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create shop modal functionality
+            const shopModal = document.getElementById('shop-modal');
+            const createShopBtn = document.getElementById('create-shop-btn');
+            const cancelShopCreate = document.getElementById('cancel-shop-create');
+            
+            // Add product modal functionality
+            const productModal = document.getElementById('product-modal');
+            const addProductBtn = document.getElementById('add-product-btn');
+            const addProductEmptyBtn = document.getElementById('add-product-empty-btn');
+            const cancelProductAdd = document.getElementById('cancel-product-add');
+            
+            // Shop modal triggers
+            if (createShopBtn) {
+                createShopBtn.addEventListener('click', function() {
+                    shopModal.classList.add('active');
+                });
+            }
+            
+            if (cancelShopCreate) {
+                cancelShopCreate.addEventListener('click', function() {
+                    shopModal.classList.remove('active');
+                });
+            }
+            
+            // Product modal triggers
+            if (addProductBtn) {
+                addProductBtn.addEventListener('click', function() {
+                    productModal.classList.add('active');
+                });
+            }
+            
+            if (addProductEmptyBtn) {
+                addProductEmptyBtn.addEventListener('click', function() {
+                    productModal.classList.add('active');
+                });
+            }
+            
+            if (cancelProductAdd) {
+                cancelProductAdd.addEventListener('click', function() {
+                    productModal.classList.remove('active');
+                });
+            }
+            
+            // Close modals when clicking outside
+            const modals = document.querySelectorAll('.modal-overlay');
+            modals.forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                    }
+                });
+            });
+
+            // File input handling for display filename
+            const shopFileInput = document.getElementById('shopImageFile');
+            const shopFileName = document.getElementById('shop-file-name');
+            const productFileInput = document.getElementById('productImageFile');
+            const productFileName = document.getElementById('product-file-name');
+            
+            if (shopFileInput && shopFileName) {
+                shopFileInput.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        shopFileName.textContent = this.files[0].name;
+                    } else {
+                        shopFileName.textContent = 'No file chosen';
+                    }
+                });
+            }
+            
+            if (productFileInput && productFileName) {
+                productFileInput.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        productFileName.textContent = this.files[0].name;
+                    } else {
+                        productFileName.textContent = 'No file chosen';
+                    }
+                });
+            }
+
+            // Image preview functionality with size validation
+            function previewImage(fileInputId, previewId, hiddenInputId) {
+                const fileInput = document.getElementById(fileInputId);
+                const preview = document.getElementById(previewId);
+                const hiddenInput = document.getElementById(hiddenInputId);
+                const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB limit
+
+                if (fileInput) {
+                    fileInput.addEventListener('change', function () {
+                        const file = this.files[0];
+                        if (file) {
+                            // Check file size
+                            if (file.size > MAX_FILE_SIZE) {
+                                alert('File is too large! Please select an image smaller than 1MB.');
+                                this.value = ''; // Clear the input
+                                if (fileInputId === 'shopImageFile') {
+                                    shopFileName.textContent = 'No file chosen';
+                                } else if (fileInputId === 'productImageFile') {
+                                    productFileName.textContent = 'No file chosen';
+                                }
+                                return;
+                            }
+                            
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                preview.src = e.target.result;
+                                preview.style.display = 'block';
+                                hiddenInput.value = e.target.result;
+                            }
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
+            }
+
+            previewImage('shopImageFile', 'shopImagePreview', 'shopImageUrl');
+            previewImage('productImageFile', 'productImagePreview', 'productImageUrl');
+        });
+    </script>
+</body>
+</html>
