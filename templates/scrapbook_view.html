@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ scrapbook.title }} - Scrapbook View</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body{
+            background-color: rgb(57, 130, 133);
+            color: black;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: rgb(20,42,43);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: background 0.3s ease;
+        }
+        /* Scrapbook Viewer Specific Styles */
+        .scrapbook-viewer {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .scrapbook-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .scrapbook-cover {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .page-viewer {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.4);
+            min-height: 600px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .page-element {
+            position: absolute;
+            pointer-events: none; /* Prevent interaction with elements in view mode */
+        }
+        
+        .page-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .page-number {
+            font-size: 1.2rem;
+            color: black;
+        }
+        
+        .creator-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .creator-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #ccc;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background: rgb(20,42,43);
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: rgb(39, 78, 80);
+            color: white;
+        }
+        button:hover {
+            background: rgb(39, 78, 80);
+            color: white;
+        }
+        /* Page turning animations */
+        @keyframes turnPageRight {
+            0% { transform: perspective(1200px) rotateY(0); }
+            100% { transform: perspective(1200px) rotateY(-180deg); }
+        }
+        
+        @keyframes turnPageLeft {
+            0% { transform: perspective(1200px) rotateY(0); }
+            100% { transform: perspective(1200px) rotateY(180deg); }
+        }
+        
+        .turning-right {
+            animation: turnPageRight 1s ease-in-out;
+            transform-origin: left center;
+        }
+        
+        .turning-left {
+            animation: turnPageLeft 1s ease-in-out;
+            transform-origin: right center;
+        }
+        
+        /* Action buttons */
+        .scrapbook-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .scrapbook-actions button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: rgb(20,42,43);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: background 0.3s ease;
+        }
+        
+        .scrapbook-actions button:hover {
+            background: rgb(39, 78, 80);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('profile', username=creator.username) }}" class="back-button">← Back to {{ creator.username }}'s Profile</a>
+        
+        <div class="scrapbook-viewer">
+            <div class="scrapbook-header">
+                <img src="{{ scrapbook.cover_image or url_for('static', filename='images/default_cover.jpg') }}" alt="{{ scrapbook.title }} Cover" class="scrapbook-cover">
+                <h1>{{ scrapbook.title }}</h1>
+                <div class="creator-info">
+                    <img src="{{ url_for('static', filename='uploads/' + creator.profile_image) if creator.get('profile_image') else url_for('static', filename='images/default-profile.jpg') }}" alt="{{ creator.username }}" class="creator-avatar">
+                    <span>Created by: {{ creator.username }}</span>
+                </div>
+            </div>
+            
+            <div class="page-viewer" id="page-container">
+                <!-- Page content will be rendered here by JavaScript -->
+            </div>
+            
+            <div class="page-controls">
+                <button onclick="prevPage()">Previous Page</button>
+                <span class="page-number" id="page-number">Page 1 of {{ scrapbook.pages|length }}</span>
+                <button onclick="nextPage()">Next Page</button>
+            </div>
+            
+            {% if session.get("user_id") == scrapbook.user_id %}
+            <div class="scrapbook-actions">
+                <a href="{{ url_for('edit_scrapbook', scrapbook_id=scrapbook._id) }}"><button>Edit Scrapbook</button></a>
+                <button onclick="deleteScrapbook('{{ scrapbook._id }}')">Delete Scrapbook</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Scrapbook data from server
+        const scrapbookData = {{ scrapbook|tojson|safe }};
+        let currentPageIndex = 0;
+        
+        // Render the current page
+        function renderPage(pageIndex) {
+            if (pageIndex < 0 || pageIndex >= scrapbookData.pages.length) return;
+            
+            currentPageIndex = pageIndex;
+            const page = scrapbookData.pages[currentPageIndex];
+            const container = document.getElementById('page-container');
+            
+            // Clear previous content
+            container.innerHTML = '';
+            
+            // Set page background
+            if (page.background) {
+                if (page.background.type === 'color') {
+                    container.style.backgroundColor = page.background.value;
+                    container.style.backgroundImage = 'none';
+                } else if (page.background.type === 'image') {
+                    container.style.backgroundImage = `url('${page.background.value}')`;
+                    container.style.backgroundSize = 'cover';
+                    container.style.backgroundPosition = 'center';
+                }
+            } else {
+                // For backwards compatibility with old format
+                container.style.backgroundColor = page.background || '#ffffff';
+            }
+            
+            // Sort elements by zIndex
+            const sortedElements = [...page.elements].sort((a, b) => a.zIndex - b.zIndex);
+            
+            // Render each element
+            sortedElements.forEach(element => {
+                const el = document.createElement('div');
+                el.className = 'page-element';
+                el.style.left = `${element.position.x}px`;
+                el.style.top = `${element.position.y}px`;
+                el.style.width = `${element.size.width}px`;
+                el.style.height = `${element.size.height}px`;
+                el.style.zIndex = element.zIndex || 1;
+                
+                if (element.type === 'text') {
+                    el.innerHTML = element.content;
+                    if (element.style) {
+                        el.style.fontFamily = element.style.fontFamily || 'Arial';
+                        el.style.fontSize = element.style.fontSize || '16px';
+                        el.style.color = element.style.color || '#000000';
+                        el.style.textAlign = element.style.textAlign || 'left';
+                        el.style.fontWeight = element.style.fontWeight || 'normal';
+                    }
+                } else if (element.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = element.content;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    el.appendChild(img);
+                } else if (element.type === 'sticker') {
+                    const img = document.createElement('img');
+                    img.src = element.content;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    el.appendChild(img);
+                }
+                
+                container.appendChild(el);
+            });
+            
+            // Update page number display
+            document.getElementById('page-number').textContent = `Page ${currentPageIndex + 1} of ${scrapbookData.pages.length}`;
+        }
+        
+        // Navigate to previous page
+        function prevPage() {
+            if (currentPageIndex > 0) {
+                const container = document.getElementById('page-container');
+                container.classList.add('turning-left');
+                
+                setTimeout(() => {
+                    renderPage(currentPageIndex - 1);
+                    container.classList.remove('turning-left');
+                }, 800);
+            }
+        }
+        
+        // Navigate to next page
+        function nextPage() {
+            if (currentPageIndex < scrapbookData.pages.length - 1) {
+                const container = document.getElementById('page-container');
+                container.classList.add('turning-right');
+                
+                setTimeout(() => {
+                    renderPage(currentPageIndex + 1);
+                    container.classList.remove('turning-right');
+                }, 800);
+            }
+        }
+        
+        // Delete scrapbook (for owner only)
+        function deleteScrapbook(scrapbookId) {
+            if (confirm('Are you sure you want to delete this scrapbook? This cannot be undone.')) {
+                fetch(`/api/scrapbook/${scrapbookId}/delete`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "{{ url_for('profile', username=session.get('username')) }}";
+                    } else {
+                        alert('Error deleting scrapbook: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the scrapbook.');
+                });
+            }
+        }
+        
+        // Initialize the first page on load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPage(0);
+        });
+    </script>
+</body>
+</html>

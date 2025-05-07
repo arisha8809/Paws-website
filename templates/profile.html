@@ -2,18 +2,553 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile Page</title>
+    <title>{{ user.username }}'s Profile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <style>
+        body, html {
+            font-family: 'Roboto Slab', serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(57, 130, 133);
+            color: black;
+        }
+        
+        .container {
+            max-width: 1700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .scrapbook-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .scrapbook-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
+            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
+            background-color: #cfc8c8;
+            height: 410px;
+            width:270px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @media (max-width: 992px) {
+            .scrapbook-card {
+                width: calc(50% - 13px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .scrapbook-card {
+                width: 100%;
+            }
+        }
+        
+        .scrapbook-card:hover {
+            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05, 1.05);
+        }
+        
+        .scrapbook-img {
+            visibility: hidden;
+            width: 100%;
+            height: 235px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        
+        .scrapbook-info-hover {
+            position: absolute;
+            padding: 16px;
+            width: 100%;
+            opacity: 0;
+            top: 0;
+            z-index: 3;
+            transition: 0.2s all ease-out;
+        }
+        
+        .scrapbook-img-hover {
+            transition: 0.2s all ease-out;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            width: 100%;
+            position: absolute;
+            height: 250px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            top: 0;
+        }
+        
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+        
+        .scrapbook-info {
+            z-index: 2;
+            background-color: blanchedalmond;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            padding: 16px 24px 24px 24px;
+        }
+        
+        .scrapbook-category {
+            font-family: 'Raleway', sans-serif;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 2px;
+            font-weight: 500;
+            color: #868686;
+        }
+        
+        .scrapbook-title {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            font-family: 'Roboto Slab', serif;
+            font-size: 1.3rem;
+            color: black;
+            font-weight: 600;
+        }
+        
+        .scrapbook-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #000000;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .scrapbook-description {
+            color: #1a1919;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .updated-at {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        .scrapbook-by {
+            font-size: 12px;
+            font-family: 'Raleway', sans-serif;
+            font-weight: 500;
+            color: #302f2f;
+        }
+        
+        .scrapbook-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 4;
+        }
+        
+        .scrapbook-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .scrapbook-actions button {
+            flex: 1;
+            padding: 8px 0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        
+        .scrapbook-actions button:hover {
+            background-color: rgb(39, 78, 80);
+        }
+        
+        .scrapbook-card:hover .scrapbook-img-hover {
+            height: 100%;
+            opacity: 0.3;
+        }
+        
+        .scrapbook-card:hover .scrapbook-info {
+            background-color: transparent;
+            position: relative;
+        }
+        
+        .scrapbook-card:hover .scrapbook-info-hover {
+            opacity: 1;
+        }
+        
+        .create-scrapbook {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: blanchedalmond;
+            border-radius: 12px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
+            height: 350px;
+            width:230px;
+            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
+        }
+        
+        .create-scrapbook:hover {
+            transform: scale(1.05, 1.05);
+            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
+            background: rgb(207, 202, 195);
+        }
+        
+        .create-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #070707;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            gap: 30px;
+        }
+        
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #333;
+        }
+        
+        .profile-info {
+            text-align: left;
+            flex: 1;
+        }
+        
+        .profile-username {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+        }
+        
+        .profile-description {
+            color: #000000;
+            margin-bottom: 15px;
+        }
+        
+        .profile-actions button {
+            padding: 8px 20px;
+            background-color: rgb(20,42,43);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .profile-actions button:hover {
+            background-color: rgb(39, 78, 80);
+        }
+        
+        .no-scrapbooks {
+            text-align: center;
+            color: #999;
+            padding: 60px 0;
+            background: #222;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-top: 30px;
+            color: #000000;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .back-button:hover {
+            color: white;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            font-family: 'Roboto Slab', serif;
+        }
+        
+        /* Clock and like icons */
+        .scrapbook-clock, .scrapbook-like {
+            width: 15px;
+            height: 15px;
+            fill: #AD7D52;
+            vertical-align: middle;
+        }
+        
+        .scrapbook-time {
+            font-size: 12px;
+            color: #AD7D52;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        
+        .scrapbook-clock-info {
+            float: right;
+        }
+        
+        /* Dialog styles for delete confirmation */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: #222;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-title {
+            margin-top: 0;
+            color: white;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-cancel {
+            background: #444;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <h1>Your Profile</h1>
-    
-    <ul>
-        <li><button onclick="alert('Scrapbook feature coming soon!')">Add to Scrapbook</button></li>
-        <li><button onclick="alert('Royal Art feature coming soon!')">Convert Image to Royal</button></li>
-        <li><button onclick="alert('Marketplace coming soon!')">Visit Marketplace</button></li>
-    </ul>
+    <div class="container">
+        <div class="profile-header">
+            <img src="{{ url_for('static', filename='images/default-profile.jpg') if not user.get('profile_image') else url_for('static', filename='uploads/' + user.profile_image) }}" alt="{{ user.username }}" class="profile-image">
+            <div class="profile-info">
+                <h1 class="profile-username">{{ user.username }}</h1>
+                <p class="profile-description">{{ user.get('description', 'No description added yet.') }}</p>
+                
+                {% if session.get("user_id") == user._id|string %}
+                <div class="profile-actions">
+                    <a href="{{ url_for('edit_profile') }}"><button>Edit Profile</button></a>
+                    <a href="{{ url_for('sell_stuff') }}"><button>Sell Stuff</button></a>
 
-    <button class="back-button" onclick="window.location.href='{{ url_for('home') }}'">Back to Home</button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>Scrapbooks</h2>
+        </div>
+        
+        {% if scrapbooks or session.get("user_id") == user._id|string %}
+            <div class="scrapbook-grid">
+                {% if session.get("user_id") == user._id|string %}
+                <div class="create-scrapbook">
+                    <a href="{{ url_for('new_scrapbook') }}" class="card-link" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%;">
+                        <div class="create-icon">+</div>
+                        <h3 style="margin-top: 10px; margin-bottom: 5px; color: rgb(0, 0, 0); font-size: 1.3rem; font-weight: 600;">Create New Scrapbook</h3>
+                        <p style="font-size: 0.9rem; color: #424242; margin-top: 10px; text-align: center;">Design your scrapbook with images, text, and stickers</p>
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% for sb in scrapbooks %}
+                    {% if sb.privacy == 'public' or session.get("user_id") == user._id|string %}
+                    <article class="scrapbook-card">
+                        
+                        
+                        <div class="scrapbook-img"></div>
+                        {% if sb.privacy == 'private' %}
+                        <div class="scrapbook-badge">Private</div>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('view_scrapbook', scrapbook_id=sb._id) }}" class="card-link">
+                            <div class="scrapbook-img-hover" style="background-image: url('{{ sb.cover_image or url_for('static', filename='images/default_cover.jpg') }}');"></div>
+                        </a>
+                        
+                        <div class="scrapbook-info">
+                            <span class="scrapbook-category">Scrapbook • {{ sb.pages|length }} pages</span>
+                            <h3 class="scrapbook-title">{{ sb.title }}</h3>
+                            <p class="scrapbook-description">
+                                {% if sb.get('description') %}
+                                    {{ sb.description|truncate(100) }}
+                                {% else %}
+                                    A creative collection of memories and ideas.
+                                {% endif %}
+                            </p>
+                            <span class="scrapbook-by">Created on <span class="scrapbook-time">{{ sb.get('created_at', '')|format_date }}</span></span>
+                            
+                            {% if session.get("user_id") == user._id|string %}
+                            
+                            {% endif %}
+                        </div>
+                    </article>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% elif user.get("scrapbooks") %}
+            <p class="no-scrapbooks">This user has no public scrapbooks.</p>
+        {% else %}
+            <p class="no-scrapbooks">No scrapbooks created yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Delete confirmation modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Delete Scrapbook</h3>
+            <p>Are you sure you want to delete "<span id="scrapbook-title-confirm"></span>"? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" id="cancel-delete">Cancel</button>
+                <button class="btn-delete" id="confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <a class="back-button" href="{{ url_for('home') }}">← Back to Home</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteModal = document.getElementById('delete-modal');
+            const cancelDelete = document.getElementById('cancel-delete');
+            const confirmDelete = document.getElementById('confirm-delete');
+            const scrapbookTitleConfirm = document.getElementById('scrapbook-title-confirm');
+            let scrapbookToDelete = null;
+            
+            // Delete scrapbook functionality with modal confirmation
+            const deleteButtons = document.querySelectorAll('.delete-scrapbook');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const scrapbookId = this.dataset.id;
+                    const scrapbookTitle = this.dataset.title;
+                    scrapbookToDelete = scrapbookId;
+                    
+                    // Update modal with scrapbook title
+                    scrapbookTitleConfirm.textContent = scrapbookTitle;
+                    
+                    // Show modal
+                    deleteModal.classList.add('active');
+                });
+            });
+            
+            // Cancel delete
+            cancelDelete.addEventListener('click', function() {
+                deleteModal.classList.remove('active');
+                scrapbookToDelete = null;
+            });
+            
+            // Confirm delete
+            confirmDelete.addEventListener('click', function() {
+                if (scrapbookToDelete) {
+                    fetch(`/api/scrapbook/${scrapbookToDelete}/delete`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the scrapbook card from the DOM
+                            const cardToRemove = document.querySelector(`.delete-scrapbook[data-id="${scrapbookToDelete}"]`).closest('.scrapbook-card');
+                            cardToRemove.remove();
+                            
+                            // Hide modal
+                            deleteModal.classList.remove('active');
+                            scrapbookToDelete = null;
+                        } else {
+                            alert('Error deleting scrapbook: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the scrapbook.');
+                    });
+                }
+            });
+            
+            // Close modal when clicking outside
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    deleteModal.classList.remove('active');
+                    scrapbookToDelete = null;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
