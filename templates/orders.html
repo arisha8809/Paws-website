@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paws - Seller Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #FF5722;
+      --secondary-color: #2196F3;
+      --accent-color: #FFEB3B;
+      --dark-color: #1A1A1A;
+      --light-color: #FFFFFF;
+      --bg-color: #FFF9C4;
+      --card-shadow: 8px 8px 0 var(--dark-color);
+      --hover-shadow: 12px 12px 0 var(--dark-color);
+    }
+
+    body, html {
+      font-family: 'Comic Neue', cursive;
+      background-color: #ffeb3b;
+      color: #1d3557;
+      justify-content: center;
+      align-items: center;
+      background-image: 
+        radial-gradient(circle, #ff5722 2px, transparent 3px),
+        radial-gradient(circle, #2196f3 2px, transparent 3px);
+      background-size: 60px 60px;
+      background-position: 0 0, 30px 30px;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      background-color: var(--secondary-color);
+      border: 4px solid var(--dark-color);
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .header h1 {
+      font-family: 'Bangers', cursive;
+      font-size: 3.5rem;
+      color: var(--primary-color);
+      text-shadow: 4px 4px 0 var(--dark-color);
+      -webkit-text-stroke: 2px var(--dark-color);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.3rem;
+      background-color: var(--accent-color);
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 30px;
+      border: 3px solid var(--dark-color);
+      box-shadow: 5px 5px 0 var(--dark-color);
+    }
+
+    .orders-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .order-card {
+      background-color: var(--light-color);
+      border: 4px solid var(--dark-color);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+      box-shadow: var(--hover-shadow);
+      transform: translateY(-5px);
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed var(--dark-color);
+    }
+
+    .order-id {
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+
+    .order-date {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .order-status {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .status-pending {
+      background-color: #FFC107;
+      color: #000;
+    }
+
+    .status-processing {
+      background-color: #2196F3;
+      color: #FFF;
+    }
+
+    .status-shipped {
+      background-color: #4CAF50;
+      color: #FFF;
+    }
+
+    .status-delivered {
+      background-color: #795548;
+      color: #FFF;
+    }
+
+    .status-cancelled {
+      background-color: #F44336;
+      color: #FFF;
+    }
+
+    .order-items {
+      margin-bottom: 20px;
+    }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #EEE;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid var(--dark-color);
+      margin-right: 15px;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .item-price {
+      color: var(--secondary-color);
+    }
+
+    .item-quantity {
+      color: #666;
+    }
+
+    .order-totals {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .totals-table {
+      width: 300px;
+    }
+
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .totals-label {
+      font-weight: bold;
+    }
+
+    .totals-value {
+      text-align: right;
+    }
+
+    .grand-total {
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-top: 2px dashed var(--dark-color);
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .order-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 3px solid var(--dark-color);
+      box-shadow: 3px 3px 0 var(--dark-color);
+      transition: all 0.2s ease;
+      font-family: 'Comic Neue', cursive;
+    }
+
+    .process-btn {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .ship-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .cancel-btn {
+      background-color: #F44336;
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .empty-orders {
+      text-align: center;
+      padding: 50px;
+      background-color: var(--light-color);
+      border: 4px solid var(--dark-color);
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .empty-orders-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+    }
+
+    .empty-orders-text {
+      font-family: 'Bangers', cursive;
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      margin-bottom: 30px;
+    }
+
+    /* FAB Button styles */
+    .fixed-action-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 100;
+    }
+
+    .btn-floating {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.3s ease;
+      border: 4px solid var(--dark-color);
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    }
+
+    .btn-floating:active {
+      transform: translate(3px, 3px);
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+
+    .fixed-action-btn ul {
+      position: absolute;
+      bottom: 80px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      list-style: none;
+    }
+
+    .fixed-action-btn.active ul {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .fixed-action-btn.active .btn-floating {
+      transform: rotate(15deg);
+    }
+
+    .menu-option {
+      background: var(--light-color);
+      color: black;
+      padding: 10px 15px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: inline-block;
+      border: 3px solid var(--dark-color);
+      box-shadow: 3px 3px 0 var(--dark-color);
+      font-family: 'Comic Neue', cursive;
+    }
+
+    .menu-option:hover {
+      background: #e0f7fa;
+      transform: scale(1.05);
+    }
+
+    .menu-option:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--dark-color);
+    }
+
+    .paw-icon {
+      width: 45px;
+      height: 45px;
+      transition: transform 0.3s ease;
+    }
+
+    .icons {
+      width: 30px;
+      height: 30px;
+      border-radius: 100%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .action-label {
+      position: absolute;
+      background: var(--light-color);
+      border: 3px solid var(--dark-color);
+      padding: 5px 10px;
+      font-family: 'Bangers', cursive;
+      font-size: 18px;
+      color: var(--dark-color);
+      border-radius: 10px;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .btn-floating:hover .action-label {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .item-image {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+
+      .totals-table {
+        width: 100%;
+      }
+
+      .order-actions {
+        justify-content: flex-start;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>YOUR ORDERS</h1>
+      <p>Manage orders from your shop</p>
+    </div>
+
+    <div class="orders-container" id="orders-container">
+      <!-- Orders will be loaded dynamically -->
+    </div>
+
+    <!-- Empty orders state (hidden by default) -->
+    <div class="empty-orders" id="empty-orders" style="display: none;">
+      <div class="empty-orders-icon">📦</div>
+      <h2 class="empty-orders-text">NO ORDERS YET!</h2>
+      <p>You'll see orders here when customers purchase your products</p>
+    </div>
+
+    <!-- FAB Button -->
+    <div class="fixed-action-btn spin-close">
+      <a class="btn-floating">
+        <img src="{{ url_for('static', filename='images/paw.png') }}" alt="Menu" class="paw-icon">
+        <span class="action-label">MENU!</span>
+      </a>
+      <ul>
+        <li>
+          <a href="{{ url_for('sell_stuff') }}" class="menu-option">
+            <img src="{{ url_for('static', filename='images/products.png') }}" class="icons"> PRODUCTS
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('marketplace') }}" class="menu-option">
+            <img src="{{ url_for('static', filename='images/marketplace.png') }}" class="icons"> MARKET
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('profile', username=session.get('username', '')) }}" class="menu-option">
+            <img src="{{ url_for('static', filename='images/profile.png') }}" class="icons"> PROFILE
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // FAB Button functionality
+        const fab = document.querySelector('.fixed-action-btn');
+        const fabButton = fab.querySelector('.btn-floating');
+
+        fabButton.addEventListener('click', function () {
+            fab.classList.toggle('active');
+            
+            if (fab.classList.contains('active')) {
+                fabButton.style.transition = 'all 0.3s ease';
+                fabButton.style.transform = 'scale(1.1)';
+                
+                setTimeout(() => {
+                    fabButton.style.transform = 'rotate(15deg)';
+                }, 100);
+            } else {
+                fabButton.style.transform = 'scale(1)';
+            }
+        });
+
+        // Load orders data
+        fetchOrders();
+
+        // Function to fetch orders data
+        function fetchOrders() {
+            fetch('/api/seller/orders')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.orders && data.orders.length > 0) {
+                            renderOrders(data.orders);
+                            document.getElementById('empty-orders').style.display = 'none';
+                            document.getElementById('orders-container').style.display = 'block';
+                        } else {
+                            document.getElementById('empty-orders').style.display = 'block';
+                            document.getElementById('orders-container').style.display = 'none';
+                        }
+                    } else {
+                        console.error('Error fetching orders:', data.message);
+                        showErrorNotification('Failed to load orders');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorNotification('Failed to load orders');
+                });
+        }
+
+        // Function to render orders
+        function renderOrders(orders) {
+            const ordersContainer = document.getElementById('orders-container');
+            
+            // Clear previous orders
+            ordersContainer.innerHTML = '';
+            
+            // Add orders
+            orders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                
+                // Format date
+                const orderDate = new Date(order.created_at);
+                const formattedDate = orderDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Get status class
+                const statusClass = `status-${order.status.toLowerCase()}`;
+                
+                // Create order items HTML
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `
+                        <div class="order-item">
+                            <img src="/static/uploads/${item.product.image || 'default-product.jpg'}" 
+                                 alt="${item.product.name}" class="item-image">
+                            <div class="item-details">
+                                <div class="item-name">${item.product.name}</div>
+                                <div class="item-price">₹${item.product.price.toFixed(2)}</div>
+                                <div class="item-quantity">Quantity: ${item.quantity}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Create order card HTML
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #${order._id.substring(0, 8)}</div>
+                            <div class="order-date">${formattedDate}</div>
+                        </div>
+                        <div class="order-status ${statusClass}">${order.status}</div>
+                    </div>
+                    
+                    <div class="order-items">
+                        ${itemsHtml}
+                    </div>
+                    
+                    <div class="order-totals">
+                        <div class="totals-table">
+                            <div class="totals-row">
+                                <span class="totals-label">Subtotal:</span>
+                                <span class="totals-value">₹${order.subtotal.toFixed(2)}</span>
+                            </div>
+                            <div class="totals-row">
+                                <span class="totals-label">Shipping:</span>
+                                <span class="totals-value">₹${order.shipping.toFixed(2)}</span>
+                            </div>
+                            <div class="totals-row grand-total">
+                                <span class="totals-label">Total:</span>
+                                <span class="totals-value">₹${order.total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-actions">
+                        ${order.status === 'pending' ? `
+                            <button class="action-btn process-btn" data-order-id="${order._id}" data-action="processing">
+                                Mark as Processing
+                            </button>
+                        ` : ''}
+                        
+                        ${order.status === 'processing' ? `
+                            <button class="action-btn ship-btn" data-order-id="${order._id}" data-action="shipped">
+                                Mark as Shipped
+                            </button>
+                        ` : ''}
+                        
+                        ${order.status !== 'cancelled' && order.status !== 'delivered' ? `
+                            <button class="action-btn cancel-btn" data-order-id="${order._id}" data-action="cancelled">
+                                Cancel Order
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                
+                ordersContainer.appendChild(orderCard);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-order-id');
+                    const action = this.getAttribute('data-action');
+                    updateOrderStatus(orderId, action);
+                });
+            });
+        }
+
+        // Function to update order status
+        function updateOrderStatus(orderId, status) {
+            fetch('/api/orders/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    order_id: orderId,
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccessNotification(`Order status updated to ${status}`);
+                    fetchOrders();
+                } else {
+                    showErrorNotification(data.message || 'Failed to update order status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorNotification('Failed to update order status');
+            });
+        }
+
+        // Notification functions
+        function showSuccessNotification(message) {
+            showNotification(message, '#4CAF50');
+        }
+
+        function showErrorNotification(message) {
+            showNotification(message, '#f44336');
+        }
+
+        function showNotification(message, color) {
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.left = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.backgroundColor = color;
+            notification.style.color = 'white';
+            notification.style.padding = '15px 25px';
+            notification.style.borderRadius = '30px';
+            notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            notification.style.zIndex = '1000';
+            notification.style.fontFamily = '"Comic Neue", cursive';
+            notification.style.fontWeight = 'bold';
+            notification.style.border = '3px solid #1A1A1A';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transition = 'opacity 0.5s';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+    });
+  </script>
+</body>
+</html>

@@ -677,6 +677,61 @@ def get_shop_products(shop_id):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
+
+@app.route('/api/orders/create', methods=['POST'])
+def create_order():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    try:
+        user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        if not user.get('cart') or len(user['cart']) == 0:
+            return jsonify({'success': False, 'message': 'Cart is empty'}), 400
+        
+        # Calculate total
+        subtotal = 0
+        for item in user['cart']:
+            product = products_collection.find_one({'_id': ObjectId(item['product_id'])})
+            if product:
+                subtotal += product['price'] * item['quantity']
+        
+        shipping = 100 if subtotal > 0 else 0
+        total = subtotal + shipping
+        
+        # Create order
+        order = {
+            'user_id': str(user['_id']),
+            'items': user['cart'],
+            'subtotal': subtotal,
+            'shipping': shipping,
+            'total': total,
+            'status': 'pending',
+            'created_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow()
+        }
+        
+        # Insert order into database (you'll need to create an orders_collection)
+        orders_collection = db["orders"]
+        result = orders_collection.insert_one(order)
+        
+        # Clear user's cart
+        users_collection.update_one(
+            {'_id': user['_id']},
+            {'$set': {'cart': []}}
+        )
+        
+        return jsonify({
+            'success': True,
+            'order_id': str(result.inserted_id),
+            'message': 'Order created successfully!'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 # Cart API Routes
 @app.route('/cart')
 def cart():
@@ -714,7 +769,7 @@ def get_cart():
                     })
                     subtotal += product['price'] * item['quantity']
         
-        shipping = 5.99 if subtotal > 0 else 0
+        shipping = 100 if subtotal > 0 else 0
         total = subtotal + shipping
         
         return jsonify({
@@ -728,7 +783,99 @@ def get_cart():
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
+    
+@app.route('/api/orders')
+def orders():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    
+    if not user or user.get('profile_type') != 'seller':
+        session.clear()
+        return redirect(url_for('index'))
+    
+    # Get products for this seller
+    products = list(products_collection.find({'seller_id': str(user['_id'])}))
+    
+    return render_template('orders.html',
+                         user=user)
 
+@app.route('/api/seller/orders')
+def get_seller_orders():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    try:
+        user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+        if not user or user.get('profile_type') != 'seller':
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+        # Get all orders that contain products from this seller
+        orders = list(orders_collection.find({
+            'items': {
+                '$elemMatch': {
+                    'product.seller_id': str(user['_id'])
+                }
+            }
+        }).sort('created_at', -1))
+        
+        # Convert ObjectId to string and add product details
+        for order in orders:
+            order['_id'] = str(order['_id'])
+            for item in order['items']:
+                if 'product_id' in item:
+                    product = products_collection.find_one({'_id': ObjectId(item['product_id'])})
+                    if product:
+                        product['_id'] = str(product['_id'])
+                        item['product'] = product
+        
+        return jsonify({'success': True, 'orders': orders})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/orders/update-status', methods=['POST'])
+def update_order_status():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    try:
+        data = request.get_json()
+        order_id = data.get('order_id')
+        status = data.get('status')
+        
+        if not order_id or not status:
+            return jsonify({'success': False, 'message': 'Missing parameters'}), 400
+        
+        user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+        if not user or user.get('profile_type') != 'seller':
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+        # Verify the order contains products from this seller
+        order = orders_collection.find_one({
+            '_id': ObjectId(order_id),
+            'items': {
+                '$elemMatch': {
+                    'product.seller_id': str(user['_id'])
+                }
+            }
+        })
+        
+        if not order:
+            return jsonify({'success': False, 'message': 'Order not found or unauthorized'}), 404
+        
+        # Update order status
+        orders_collection.update_one(
+            {'_id': ObjectId(order_id)},
+            {'$set': {
+                'status': status,
+                'updated_at': datetime.utcnow()
+            }}
+        )
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 @app.route('/api/cart/add', methods=['POST'])
 def add_to_cart():
     if 'user_id' not in session:
@@ -736,35 +883,35 @@ def add_to_cart():
     
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'No data provided'}), 400
+            
         product_id = data.get('product_id')
-        
         if not product_id:
-            return jsonify({'success': False, 'message': 'Product ID is required'})
+            return jsonify({'success': False, 'message': 'Product ID is required'}), 400
         
         # Verify product exists
         product = products_collection.find_one({'_id': ObjectId(product_id)})
         if not product:
-            return jsonify({'success': False, 'message': 'Product not found'})
+            return jsonify({'success': False, 'message': 'Product not found'}), 404
         
-        # Update user's cart
+        # Fetch user and their cart
         user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
         if not user:
             return jsonify({'success': False, 'message': 'User not found'}), 404
         
         cart = user.get('cart', [])
         
-        # Check if product already in cart
-        found = False
+        # Check if product is already in cart
         for item in cart:
             if item['product_id'] == product_id:
                 item['quantity'] += 1
-                found = True
                 break
-        
-        if not found:
+        else:
             cart.append({
                 'product_id': product_id,
-                'quantity': 1
+                'quantity': 1,
+                'added_at': datetime.utcnow()
             })
         
         users_collection.update_one(
@@ -772,10 +919,15 @@ def add_to_cart():
             {'$set': {'cart': cart}}
         )
         
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        return jsonify({
+            'success': True,
+            'message': 'Product added to cart',
+            'cart_count': sum(item['quantity'] for item in cart)
+        })
 
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
 @app.route('/api/cart/update', methods=['POST'])
 def update_cart_item():
     if 'user_id' not in session:

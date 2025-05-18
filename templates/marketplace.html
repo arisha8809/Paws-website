@@ -19,38 +19,27 @@
       --hover-shadow: 12px 12px 0 var(--dark-color);
     }
 
-    body {
-      font-family: 'Comic Neue', cursive;
-      background-color: var(--bg-color);
-      color: var(--accent-color);
-      padding: 20px;
-      background-image: 
-        radial-gradient(circle, var(--primary-color) 2px, transparent 3px),
-        radial-gradient(circle, var(--secondary-color) 2px, transparent 3px);
-      background-size: 60px 60px;
-      background-position: 0 0, 30px 30px;
-    }
+    body, html {
+            font-family: 'Comic Neue', cursive;
+            background-color: #ffeb3b;
+            color: #1d3557;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle, #ff5722 2px, transparent 3px),
+                radial-gradient(circle, #2196f3 2px, transparent 3px);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
 
-    .comic-border {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      bottom: 20px;
-      border: 8px solid var(--dark-color);
-      border-radius: 2px;
-      box-shadow: 
-        0 0 0 8px var(--light-color),
-        0 0 0 16px var(--dark-color);
-      pointer-events: none;
-      z-index: -1;
-    }
-
+    
     .header {
       text-align: center;
       margin-bottom: 40px;
       padding: 20px;
-      background-color: var(--light-color);
+    background-color: var(--secondary-color);
       border: 4px solid var(--dark-color);
       border-radius: 15px;
       box-shadow: var(--card-shadow);
@@ -77,9 +66,9 @@
     }
 
     .section-title {
-      font-family: 'Bangers', cursive;
+      font-family: 'Bubblegum Sans', cursive;
       font-size: 2.5rem;
-      color: var(--secondary-color);
+      color: #2d298e;;
       text-shadow: 3px 3px 0 var(--dark-color);
       -webkit-text-stroke: 1px var(--dark-color);
       margin: 30px 0 20px;
@@ -103,7 +92,9 @@
       box-shadow: var(--card-shadow);
       transition: all 0.3s ease;
       position: relative;
+      height: 350px;
     }
+
 
     .shop-card:hover {
       transform: translateY(-10px);
@@ -115,6 +106,7 @@
       overflow: hidden;
       border-bottom: 4px solid var(--dark-color);
       position: relative;
+      margin-bottom: -24px;
     }
 
     .shop-image {
@@ -142,7 +134,7 @@
     }
 
     .shop-info {
-      padding: 20px;
+      padding: 11px;
     }
 
     .shop-name {
@@ -164,7 +156,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 15px;
+      margin-top: -15px;
     }
 
     .shop-owner {
@@ -208,7 +200,9 @@
       overflow: hidden;
       box-shadow: var(--card-shadow);
       transition: all 0.3s ease;
+      height: 450px;
     }
+
 
     .product-card:hover {
       transform: translateY(-5px) rotate(-1deg);
@@ -216,9 +210,10 @@
     }
 
     .product-image-container {
-      height: 200px;
+      height: 300px;
       overflow: hidden;
       border-bottom: 4px solid var(--dark-color);
+      margin-bottom: -64px;
     }
 
     .product-image {
@@ -233,20 +228,20 @@
     }
 
     .product-info {
-      padding: 15px;
+      padding: 10px;
     }
 
     .product-name {
       font-family: 'Bangers', cursive;
       font-size: 1.5rem;
       color: var(--primary-color);
-      margin-bottom: 5px;
+      margin-bottom: 24px;
       -webkit-text-stroke: 1px var(--dark-color);
       letter-spacing: 1px;
     }
 
     .product-description {
-      margin-bottom: 10px;
+      margin-bottom: -19px;
       font-size: 0.9rem;
       color: #555;
     }
@@ -255,7 +250,7 @@
       font-weight: bold;
       font-size: 1.3rem;
       color: var(--secondary-color);
-      margin-bottom: 15px;
+      margin-bottom: -12px;
     }
 
     .product-shop {
@@ -461,14 +456,19 @@
         font-size: 14px;
       }
     }
+     .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
   </style>
 </head>
 
 <body>
-  <div class="comic-border"></div>
-  
+      <div class="container">
+
   <div class="header">
-    <h1>PAWS MARKETPLACE</h1>
+    <h1>MARKETPLACE</h1>
     <p>Find awesome pet products from our sellers!</p>
   </div>
 
@@ -495,22 +495,26 @@
 
   <h2 class="section-title">Featured Products</h2>
   <div class="products-grid" id="featured-products">
-    {% for product in featured_products %}
-    <div class="product-card">
-      <div class="product-image-container">
-        <img src="{{ url_for('static', filename='uploads/' + (product.image if product.image else 'default-product.jpg')) }}" 
-             alt="{{ product.name }}" class="product-image">
-      </div>
-      <div class="product-info">
-        <h3 class="product-name">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description or "No description available" }}</p>
-        <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
-        <p class="product-shop">From: {{ product.shop_name }}</p>
-        <button class="add-to-cart-btn" data-product-id="{{ product._id }}">Add to Cart</button>
-      </div>
+  {% for product in featured_products %}
+  <div class="product-card">
+    <div class="product-image-container">
+      <img src="{{ url_for('static', filename='uploads/' + (product.image if product.image else 'default-product.jpg')) }}" 
+           alt="{{ product.name }}" class="product-image">
     </div>
-    {% endfor %}
+    <div class="product-info">
+      <h3 class="product-name">{{ product.name }}</h3>
+      <p class="product-description">{{ product.description or "No description available" }}</p>
+      <p class="product-price">₹{{ "%.2f"|format(product.price) }}</p>
+      <p class="product-shop">From: {{ product.shop_name }}</p>
+      <button class="add-to-cart-btn" 
+              data-product-id="{{ product._id }}"
+              onclick="addToCart('{{ product._id }}')">
+        Add to Cart
+      </button>
+    </div>
   </div>
+  {% endfor %}
+</div>
 
   <!-- Products by Seller (hidden by default) -->
   <div id="products-by-seller" style="display: none;">
@@ -543,6 +547,7 @@
       </li>
     </ul>
   </div>
+</div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -642,28 +647,87 @@
         });
       }
 
-      // Function to add product to cart
-      function addToCart(productId) {
-        fetch('/api/cart/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ product_id: productId })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert('Product added to cart!');
-          } else {
-            alert('Error: ' + data.message);
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('Failed to add to cart');
-        });
-      }
+    // Function to add product to cart
+function addToCart(productId) {
+  if (!productId) {
+    console.error('Product ID is missing');
+    showErrorNotification('Product ID is missing');
+    return;
+  }
+
+  fetch('/api/cart/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product_id: productId })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network error');
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      showCartNotification();
+      console.log('Cart count:', data.cart_count); // Optional: update cart UI
+    } else {
+      showErrorNotification(data.message || 'Failed to add to cart');
+    }
+  })
+  .catch(error => {
+    console.error('Add to cart failed:', error);
+    showErrorNotification('Failed to add to cart');
+  });
+}
+
+// Reusable notification function
+function showNotification(message, bgColor) {
+  const box = document.createElement('div');
+  Object.assign(box.style, {
+    position: 'fixed',
+    bottom: '20px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: bgColor,
+    color: 'white',
+    padding: '15px 25px',
+    borderRadius: '30px',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+    zIndex: '1000',
+    fontFamily: '"Comic Neue", cursive',
+    fontWeight: 'bold',
+    border: '3px solid #1A1A1A',
+    opacity: '1',
+    transition: 'opacity 0.5s'
+  });
+
+  box.textContent = message;
+  document.body.appendChild(box);
+
+  setTimeout(() => {
+    box.style.opacity = '0';
+    setTimeout(() => {
+      document.body.removeChild(box);
+    }, 500);
+  }, 2000);
+}
+
+function showCartNotification() {
+  showNotification('Added to cart! 🐾', '#4CAF50');
+}
+
+function showErrorNotification(message) {
+  showNotification(message || 'An error occurred!', '#f44336');
+}
+
+// Add event listeners to all existing Add to Cart buttons
+document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+  button.addEventListener('click', function () {
+    const productId = this.getAttribute('data-product-id');
+    addToCart(productId);
+  });
+});
+
     });
   </script>
 </body>
