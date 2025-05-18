@@ -144,6 +144,8 @@
             transition: transform 1s ease;
             padding: 20px;
             box-sizing: border-box;
+            position: relative;
+            transform: none;
         }
 
         .page-content {
@@ -344,6 +346,10 @@
             <a href="{{ url_for('edit_scrapbook', scrapbook_id=scrapbook._id) }}" class="action-button">EDIT SCRAPBOOK</a>
             <button class="action-button" onclick="deleteScrapbook('{{ scrapbook._id }}')">DELETE SCRAPBOOK</button>
         </div>
+        <div class="scrapbook-actions">
+            <button class="action-button" onclick="downloadScrapbookAsPDF()">DOWNLOAD AS PDF</button>
+        </div>
+
         {% endif %}
     </div>
 
@@ -384,7 +390,7 @@
                     cover.style.display = 'none';
                     spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
                     renderPage(0);
-                }, 1500);
+                }, 350);
             }
         }
         
@@ -497,7 +503,7 @@
                     currentPage.style.transform = 'rotateY(0deg)';
                     spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
                     renderPage(currentPageIndex - 1);
-                }, 1000);
+                }, 350);
             } else if (currentPageIndex === 0) {
                 // Go back to cover
                 const currentPage = document.getElementById(`page-${currentPageIndex}`);
@@ -512,7 +518,7 @@
                     spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
                     currentPageIndex = -1;
                     document.getElementById('page-indicator').textContent = 'COVER';
-                }, 1000);
+                }, 350);
             }
         }
         
@@ -531,7 +537,7 @@
                     currentPage.style.transform = 'rotateY(0deg)';
                     spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
                     renderPage(currentPageIndex + 1);
-                }, 1000);
+                }, 350);
             }
         }
         
@@ -570,6 +576,88 @@
                 }
             });
         });
+
+async function downloadScrapbookAsPDF() {
+    const loader = document.getElementById('pdf-loader');
+    loader.style.display = 'flex'; // Show loader
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+    const pageWidth = 297;
+    const pageHeight = 210;
+
+    const pages = [];
+    const cover = document.getElementById('book-cover');
+    const pageDivs = document.querySelectorAll('.book-page');
+
+    try {
+        // COVER
+        if (cover) {
+            cover.style.display = 'flex';
+            cover.style.transform = 'none';
+            await new Promise(r => setTimeout(r, 500));
+            const canvas = await html2canvas(cover, { scale: 2, useCORS: true, backgroundColor: null });
+            pages.push(canvas.toDataURL('image/jpeg', 1.0));
+            cover.style.display = 'none';
+        }
+
+        // PAGES
+        for (let i = 0; i < pageDivs.length; i++) {
+            pageDivs.forEach(p => (p.style.display = 'none'));
+            const page = pageDivs[i];
+            page.style.display = 'block';
+            page.style.transform = 'none';
+            await new Promise(r => setTimeout(r, 500));
+            const canvas = await html2canvas(page, { scale: 2, useCORS: true, backgroundColor: null });
+            pages.push(canvas.toDataURL('image/jpeg', 1.0));
+        }
+
+        // BUILD PDF
+        pages.forEach((img, idx) => {
+            if (idx > 0) pdf.addPage("a4", "landscape");
+            pdf.addImage(img, 'JPEG', 0, 0, pageWidth, pageHeight);
+        });
+
+        pdf.save(`${scrapbookData.title || 'scrapbook'}.pdf`);
+    } catch (error) {
+        alert("PDF generation failed! Try again.");
+        console.error(error);
+    } finally {
+        loader.style.display = 'none'; // Hide loader
+    }
+}
+
+
     </script>
+    <div id="pdf-loader" style="
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+">
+    <div style="
+        background: white;
+        padding: 30px 40px;
+        border-radius: 10px;
+        border: 4px solid #000;
+        font-family: 'Bangers', cursive;
+        font-size: 1.5rem;
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+        text-align: center;
+    ">
+        Generating your comic PDF...<br>
+        <span style="font-size: 2rem;">🖨️📄💥</span>
+    </div>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <div id="pdf-render-container" style="position: absolute; top: -9999px; left: -9999px; visibility: hidden;"></div>
+    <div id="pdf-strip-container" style="position: absolute; top: -9999px; left: -9999px; display: flex; background: white;"></div>
+    <div id="pdf-canvas-wrapper" style="position: absolute; top: -9999px; left: -9999px; visibility: hidden;"></div>
 </body>
 </html>
