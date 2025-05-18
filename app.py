@@ -240,10 +240,41 @@ def profile(username):
     
     return render_template("profile.html", user=user, scrapbooks=scrapbooks)
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
+@app.route('/edit_profile', methods=['POST'])
 def edit_profile():
     if 'user_id' not in session:
         return redirect(url_for('index'))
+
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    if not user:
+        session.clear()
+        return redirect(url_for('index'))
+
+    updates = {}
+
+    # ✅ Update username
+    new_username = request.form.get('username', '').strip()
+    if new_username and new_username != user['username']:
+        # Check if username already exists
+        existing = users_collection.find_one({'username': new_username})
+        if existing and str(existing['_id']) != session['user_id']:
+            flash('Username already taken!', 'error')
+            return redirect(url_for('profile', username=user['username']))
+        updates['username'] = new_username
+        session['username'] = new_username  # Update session
+
+    # ✅ Update profile image
+    profile_image = request.files.get('profile_image')
+    if profile_image and profile_image.filename:
+        filename = save_file(profile_image)
+        if filename:
+            updates['profile_image'] = filename
+
+    if updates:
+        users_collection.update_one({'_id': user['_id']}, {'$set': updates})
+
+    return redirect(url_for('profile', username=updates.get('username', user['username'])))
+
 
     user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
     if not user:

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ user.username }}'s Comic Profile</title>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Bubblegum+Sans&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Base Styles with New Color Scheme */
         body, html {
@@ -88,7 +89,7 @@
             justify-content: center;
             padding: 20px;
             overflow: hidden;
-            background: linear-gradient(135deg, #457b9d, #1d3557);
+            background: white;
         }
 
         .profile-image-container {
@@ -98,13 +99,14 @@
             top: 0;
             left: 0;
             z-index: 1;
-            opacity: 0.15;
+            opacity: 0.9;
         }
 
         .profile-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+
         }
 
         .profile-info {
@@ -114,39 +116,18 @@
             text-align: center;
         }
 
-        /* Speech Bubble for Username */
         .speech-bubble {
-            position: relative;
+            position: absolute;
+            top: -150px;
+            left: -10px;
             background: #f1faee;
             border-radius: 25px;
             padding: 20px;
             border: 3px solid #000;
-            max-width: 90%;
-            margin: 0 auto;
-            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+            box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
             transform: rotate(-1deg);
-        }
-
-        .speech-bubble:after {
-            content: '';
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 15px solid transparent;
-            border-top-color: #f1faee;
-            border-bottom: 0;
-        }
-
-        .speech-bubble:before {
-            content: '';
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 18px solid transparent;
-            border-top-color: #000;
-            border-bottom: 0;
+            max-width: 300px; /* limit width for small corner space */
+            z-index: 10;
         }
 
         .profile-username {
@@ -175,34 +156,35 @@
             transform: rotate(1deg);
         }
 
-        /* Action Buttons */
-        .action-button {
-            padding: 12px 25px;
+        .action-button.pencil-icon {
+            position: absolute;
+            top: 90px;
+            left: 700px;
+            width: 50px;
+            height: 50px;
             background-color: #ffbe0b;
             color: #1d3557;
             border: 3px solid #000;
-            border-radius: 12px;
-            font-weight: bold;
+            border-radius: 50%;
             font-family: 'Bangers', cursive;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
+            font-weight: bold;
             cursor: pointer;
             box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
             transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-            z-index: 2;
-            position: relative;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
         }
 
-        .action-button:hover {
-            transform: translateY(-3px) rotate(-1deg);
+        .action-button.pencil-icon:hover {
+            transform: translateY(-3px) rotate(-5deg);
             box-shadow: 7px 7px 0px rgba(0,0,0,0.4);
             background-color: #e63946;
             color: #f1faee;
         }
+
 
         /* Create Panel */
         .create-panel {
@@ -264,7 +246,7 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
             padding: 40px 30px;
-            background: #f1faee;
+            background: hsla(180, 51%, 60%, 1);
             border: 3px solid #000;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
         }
@@ -472,6 +454,27 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
             transform: translateY(-30px) scale(0.95);
             transition: all 0.3s ease;
+        }
+        #edit-profile-form .form-group {
+        margin-bottom: 20px;
+        }
+
+        #edit-profile-form label {
+        font-family: 'Comic Neue', cursive;
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 8px;
+        color: #1d3557;
+        }
+
+        #edit-profile-form .form-input {
+        width: 100%;
+        padding: 10px;
+        font-family: 'Comic Neue', cursive;
+        font-size: 1rem;
+        border: 2px solid #1d3557;
+        border-radius: 10px;
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
         }
 
         .modal-overlay.active .modal-content {
@@ -771,9 +774,10 @@
                     </div>
                     
                     {% if session.get("user_id") == user._id|string %}
-                    <div class="profile-actions">
-                        <a href="{{ url_for('edit_profile') }}" class="action-button">Edit Profile</a>
-                    </div>
+                    <a href="/edit_profile" class="action-button pencil-icon" title="Edit Profile">
+                        <i class="fas fa-pencil-alt"></i>
+                    </a>
+
                     {% endif %}
                 </div>
             </div>
@@ -979,6 +983,56 @@
                 }
             });
         });
+
+        // Open edit form modal
+        document.querySelector('.pencil-icon')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('edit-profile-modal').classList.add('active');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // When pencil icon is clicked -> open modal
+            document.querySelector('.pencil-icon')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('edit-profile-modal').classList.add('active');
+            });
+
+            // When Cancel button is clicked -> close modal
+            document.getElementById('cancel-edit')?.addEventListener('click', function () {
+                document.getElementById('edit-profile-modal').classList.remove('active');
+            });
+
+            // Extra: Click outside the modal also closes it
+            document.getElementById('edit-profile-modal')?.addEventListener('click', function (e) {
+                if (e.target.id === 'edit-profile-modal') {
+                e.target.classList.remove('active');
+                }
+            });
+            });
+
+
+
     </script>
+
+    <div class="modal-overlay" id="edit-profile-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Edit Profile</h3>
+            <form id="edit-profile-form" action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="username">New Username:</label>
+                <input type="text" name="username" id="username" class="form-input" value="{{ user.username }}">
+            </div>
+            <div class="form-group">
+                <label for="profile_image">Profile Picture:</label>
+                <input type="file" name="profile_image" id="profile_image" class="form-input">
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" id="cancel-edit">Cancel</button>
+                <button type="submit" class="btn-delete">Save</button>
+            </div>
+            </form>
+        </div>
+        </div>
+
 </body>
 </html>
