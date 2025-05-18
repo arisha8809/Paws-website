@@ -758,6 +758,157 @@
                 height: 30px;
             }
         }
+        /* Image Converter Panel */
+.image-converter-panel {
+    grid-column: 1 / 4;
+    grid-row: 4;
+    background-color: #a8dadc;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.converter-title {
+    font-family: 'Bangers', cursive;
+    font-size: 2.2rem;
+    color: #1d3557;
+    text-shadow: 2px 2px 0 rgba(241, 250, 238, 0.7);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.converter-description {
+    font-family: 'Bubblegum Sans', cursive;
+    color: #1d3557;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.converter-form {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.file-label {
+    display: block;
+    padding: 20px;
+    background: #f1faee;
+    border: 3px dashed #457b9d;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Bangers', cursive;
+    color: #1d3557;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+}
+
+.file-label:hover {
+    background: #e63946;
+    color: #f1faee;
+    border-color: #1d3557;
+}
+
+.file-input {
+    display: none;
+}
+
+.convert-button {
+    width: 100%;
+    padding: 15px;
+    background: #e63946;
+    color: #f1faee;
+    border: 3px solid #000;
+    border-radius: 12px;
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+}
+
+.convert-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 7px 7px 0 rgba(0,0,0,0.4);
+    background: #1d3557;
+}
+
+.loader {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 0;
+}
+
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f1faee;
+    border-top: 5px solid #e63946;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader p {
+    font-family: 'Comic Neue', cursive;
+    color: #1d3557;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.result-container {
+    display: none;
+    width: 100%;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.image-preview {
+    margin-bottom: 20px;
+    border: 3px solid #000;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    background: white;
+    padding: 10px;
+}
+
+.image-preview img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.download-button {
+    display: inline-block;
+    padding: 12px 25px;
+    background: #ffbe0b;
+    color: #1d3557;
+    text-decoration: none;
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    border: 3px solid #000;
+    border-radius: 12px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+}
+
+.download-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 7px 7px 0 rgba(0,0,0,0.4);
+    background: #1d3557;
+    color: #f1faee;
+}
     </style>
 </head>
 <body>
@@ -848,8 +999,42 @@
                 {% endif %}
             </div>
         </div>
+        <p></p>
+          <!-- Add this right before the closing </div> for the comic-page -->
+<div class="comic-panel image-converter-panel">
+    <h3 class="converter-title">COMIC IMAGE CONVERTER</h3>
+    <p class="converter-description">Turn your photos into comic-style masterpieces!</p>
+    
+    <div class="converter-container">
+        <form id="uploadForm" enctype="multipart/form-data" class="converter-form">
+            <div class="form-group">
+                <label for="imageInput" class="file-label">
+                    <i class="fas fa-cloud-upload-alt"></i> CHOOSE IMAGE
+                    <input type="file" name="image" id="imageInput" accept="image/*" required class="file-input"/>
+                </label>
+            </div>
+            <button type="submit" class="convert-button">
+                <i class="fas fa-magic"></i> CONVERT TO COMIC
+            </button>
+        </form>
+        
+        <div class="loader" id="loading">
+            <div class="loader-spinner"></div>
+            <p>Processing image...</p>
+        </div>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="image-preview">
+                <img id="comicImage" alt="Comic Style Result"/>
+            </div>
+            <a href="#" class="download-button" id="downloadButton" download="comic-image.png">
+                <i class="fas fa-download"></i> DOWNLOAD
+            </a>
+        </div>
     </div>
-
+</div>
+    </div>
+  
     <!-- Floating Action Button -->
     <div class="fixed-action-btn">
         <a class="btn-floating">
@@ -1009,7 +1194,49 @@
                 }
             });
             });
+            // Image Converter Functionality
+const form = document.getElementById('uploadForm');
+const loading = document.getElementById('loading');
+const comicImage = document.getElementById('comicImage');
+const resultContainer = document.getElementById('resultContainer');
+const downloadButton = document.getElementById('downloadButton');
+let convertedImageUrl = null;
 
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loading.style.display = 'flex';
+    resultContainer.style.display = 'none';
+    
+    const formData = new FormData(form);
+    try {
+        const response = await fetch('/convert-comic', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Image conversion failed');
+        }
+
+        const blob = await response.blob();
+        convertedImageUrl = URL.createObjectURL(blob);
+
+        comicImage.src = convertedImageUrl;
+        downloadButton.href = convertedImageUrl;
+        resultContainer.style.display = 'block';
+    } catch (err) {
+        alert('Error: ' + err.message);
+    } finally {
+        loading.style.display = 'none';
+    }
+});
+
+// Clean up object URLs when leaving the page
+window.addEventListener('beforeunload', () => {
+    if (convertedImageUrl) {
+        URL.revokeObjectURL(convertedImageUrl);
+    }
+});
 
 
     </script>
