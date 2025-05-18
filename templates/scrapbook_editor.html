@@ -1046,56 +1046,77 @@
                 const resizeHandle = document.createElement('div');
                 resizeHandle.className = 'resize-handle';
                 elementDiv.appendChild(resizeHandle);
+                setupElementResizing(elementDiv, resizeHandle, index);
+
                 
-                // Set up element based on type
-                if (element.type === 'text') {
-                    elementDiv.innerHTML += `<div contenteditable="true" style="width: 100%; height: 100%; outline: none; 
-                        font-family: ${element.style.fontFamily}; 
-                        font-size: ${element.style.fontSize}; 
-                        color: ${element.style.color};
-                        text-align: ${element.style.textAlign};
-                        font-weight: ${element.style.fontWeight};
-                        font-style: ${element.style.fontStyle};
-                        text-decoration: ${element.style.textDecoration};">${element.content}</div>`;
-                    
-                    if (element.effects && element.effects.paperEffect) {
-                        elementDiv.classList.add('paper-effect');
-                    }
-                    
-                    // Set up text element interaction
-                    const textContent = elementDiv.querySelector('[contenteditable="true"]');
-                    textContent.addEventListener('input', () => {
-                        element.content = textContent.innerHTML;
-                    });
-                    
-                    textContent.addEventListener('focus', () => {
-                        selectElement(index);
-                        document.getElementById("text-styling-section").style.display = "block";
-                    });
-                    
-                } else if (element.type === 'image') {
-                    let imgWrapper = document.createElement('div');
-                    
-                    if (element.effects.polaroid) {
-                        imgWrapper.className = 'polaroid';
-                        elementDiv.style.backgroundColor = 'white';
-                    } else if (element.effects.paperEffect) {
-                        imgWrapper.className = 'image-paper';
-                    }
-                    
-                    imgWrapper.innerHTML = `<img src="${element.content}" alt="User Image" style="width: 100%; height: 100%; object-fit: cover;">`;
-                    elementDiv.appendChild(imgWrapper);
-                    
-                    if (element.effects.tape) {
-                        const tapeDiv = document.createElement('div');
-                        tapeDiv.className = 'tape';
-                        tapeDiv.style.setProperty('--tape-rotation', `${Math.random() * 20 - 10}deg`);
-                        elementDiv.appendChild(tapeDiv);
-                    }
-                    
-                } else if (element.type === 'sticker') {
-                    elementDiv.innerHTML += `<img src="${element.content}" alt="Sticker" style="width: 100%; height: 100%; object-fit: contain;">`;
-                }
+            if (element.type === 'text') {
+    const editableDiv = document.createElement('div');
+    editableDiv.setAttribute('contenteditable', 'true');
+    editableDiv.style.width = '100%';
+    editableDiv.style.height = '100%';
+    editableDiv.style.outline = 'none';
+    editableDiv.style.fontFamily = element.style.fontFamily;
+    editableDiv.style.fontSize = element.style.fontSize;
+    editableDiv.style.color = element.style.color;
+    editableDiv.style.textAlign = element.style.textAlign;
+    editableDiv.style.fontWeight = element.style.fontWeight;
+    editableDiv.style.fontStyle = element.style.fontStyle;
+    editableDiv.style.textDecoration = element.style.textDecoration;
+
+    editableDiv.innerHTML = element.content;
+
+    editableDiv.addEventListener('input', () => {
+        element.content = editableDiv.innerHTML;
+    });
+
+    editableDiv.addEventListener('focus', () => {
+        selectElement(index);
+        document.getElementById("text-styling-section").style.display = "block";
+    });
+
+    // ✅ Fix: Forward mousedown to .draggable-element so dragging works
+    editableDiv.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || e.target.closest('.resize-handle')) return;
+
+    const parent = editableDiv.closest('.draggable-element');
+    if (!parent) return;
+
+    // Manually initiate drag exactly like setupElementDragging
+    let isDragging = true;
+    let offsetX = e.clientX - parent.getBoundingClientRect().left;
+    let offsetY = e.clientY - parent.getBoundingClientRect().top;
+
+    const mouseMoveHandler = (moveEvent) => {
+        if (!isDragging) return;
+        const containerRect = pageContainer.getBoundingClientRect();
+        let newX = moveEvent.clientX - containerRect.left - offsetX;
+        let newY = moveEvent.clientY - containerRect.top - offsetY;
+
+        parent.style.left = `${newX}px`;
+        parent.style.top = `${newY}px`;
+
+        scrapbookData.pages[currentPageIndex].elements[index].position = { x: newX, y: newY };
+    };
+
+    const mouseUpHandler = () => {
+        isDragging = false;
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+    };
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+});
+
+
+    elementDiv.appendChild(editableDiv);
+
+    if (element.effects && element.effects.paperEffect) {
+        elementDiv.classList.add('paper-effect');
+    }
+}
+
+
                 
                 // Set up event listeners for dragging
                 setupElementDragging(elementDiv, index);
@@ -1316,72 +1337,103 @@
             paperEffectCheckbox.checked = currentElement.effects && currentElement.effects.paperEffect;
         }
         
-        // Update text styling for the selected element
         function updateTextStyle(property, value) {
-            if (selectedElementIndex < 0) return;
-            
-            const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
-            if (currentElement && currentElement.type === 'text') {
-                currentElement.style[property] = value;
-                
-                // Update the element in the DOM
-                const textElement = document.querySelectorAll('.draggable-element')[selectedElementIndex];
-                const editableDiv = textElement.querySelector('[contenteditable="true"]');
-                
-                if (editableDiv) {
-                    editableDiv.style[property] = value;
-                }
-                
-                // If it's font size, update the displayed value
-                if (property === 'fontSize') {
-                    document.getElementById('font-size-value').textContent = value;
-                }
-            }
+    if (selectedElementIndex < 0) return;
+
+    const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
+    if (currentElement && currentElement.type === 'text') {
+        currentElement.style[property] = value;
+
+        // Update the element in the DOM
+        const textElement = document.querySelectorAll('.draggable-element')[selectedElementIndex];
+        const editableDiv = textElement.querySelector('[contenteditable="true"]');
+
+        if (editableDiv) {
+            editableDiv.style[property] = value;
+
+            // 👇 Force focus back so styling doesn't disappear
+            setTimeout(() => {
+                editableDiv.focus();
+
+                // Optional: Move caret to end
+                const range = document.createRange();
+                const sel = window.getSelection();
+                range.selectNodeContents(editableDiv);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }, 0);
+
+            // 👇 Save updated content back into model
+            currentElement.content = editableDiv.innerHTML;
         }
+
+        // If it's font size, update the displayed value
+        if (property === 'fontSize') {
+            document.getElementById('font-size-value').textContent = value;
+        }
+    }
+}
+
         
         // Toggle text styling properties (bold, italic, underline)
         function toggleTextStyle(property, value) {
-            if (selectedElementIndex < 0) return;
-            
-            const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
-            if (currentElement && currentElement.type === 'text') {
-                // Toggle the property value
-                const newValue = currentElement.style[property] === value ? 'normal' : value;
-                currentElement.style[property] = newValue;
-                
-                // Update the element in the DOM
-                const textElement = document.querySelectorAll('.draggable-element')[selectedElementIndex];
-                const editableDiv = textElement.querySelector('[contenteditable="true"]');
-                
-                if (editableDiv) {
-                    editableDiv.style[property] = newValue;
-                }
-                
-                // Update styling controls
-                const buttons = document.querySelectorAll('.text-style-btn');
-                let buttonIndex;
-                
-                switch(property) {
-                    case 'fontWeight':
-                        buttonIndex = 0;
-                        break;
-                    case 'fontStyle':
-                        buttonIndex = 1;
-                        break;
-                    case 'textDecoration':
-                        buttonIndex = 2;
-                        break;
-                }
-                
-                if (buttonIndex !== undefined) {
-                    if (newValue === value) {
-                        buttons[buttonIndex].classList.add('active');
-                    } else {
-                        buttons[buttonIndex].classList.remove('active');
-                    }
-                }
+    if (selectedElementIndex < 0) return;
+
+    const currentElement = scrapbookData.pages[currentPageIndex].elements[selectedElementIndex];
+    if (currentElement && currentElement.type === 'text') {
+        // Toggle the property value
+        const newValue = currentElement.style[property] === value ? 'normal' : value;
+        currentElement.style[property] = newValue;
+
+        // Update the element in the DOM
+        const textElement = document.querySelectorAll('.draggable-element')[selectedElementIndex];
+        const editableDiv = textElement.querySelector('[contenteditable="true"]');
+
+        if (editableDiv) {
+            editableDiv.style[property] = newValue;
+
+            // Save updated content into data model
+            currentElement.content = editableDiv.innerHTML;
+
+            // Optional: refocus and maintain selection
+            setTimeout(() => {
+                editableDiv.focus();
+                const range = document.createRange();
+                range.selectNodeContents(editableDiv);
+                range.collapse(false);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }, 0);
+        }
+
+        // Update styling controls
+        const buttons = document.querySelectorAll('.text-style-btn');
+        let buttonIndex;
+
+        switch (property) {
+            case 'fontWeight':
+                buttonIndex = 0;
+                break;
+            case 'fontStyle':
+                buttonIndex = 1;
+                break;
+            case 'textDecoration':
+                buttonIndex = 2;
+                break;
+        }
+
+        if (buttonIndex !== undefined) {
+            if (newValue === value) {
+                buttons[buttonIndex].classList.add('active');
+            } else {
+                buttons[buttonIndex].classList.remove('active');
             }
         }
+    }
+}
+
         
         // Toggle paper effect for the selected element
         function togglePaperEffect(enabled) {
