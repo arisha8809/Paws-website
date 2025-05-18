@@ -4,197 +4,420 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ scrapbook.title }} - Scrapbook View</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body{
-            background-color: rgb(57, 130, 133);
-            color: black;
+        /* Comic Book Base Styles */
+        body {
+            font-family: 'Comic Neue', cursive;
+            background-color: #f8f4e9;
+            background-image: url('https://www.transparenttextures.com/patterns/cartographer.png');
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #1d3557;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            background: rgb(20,42,43);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            color: white;
-            transition: background 0.3s ease;
-        }
-        /* Scrapbook Viewer Specific Styles */
-        .scrapbook-viewer {
-            max-width: 900px;
+
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
-        
-        .scrapbook-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .scrapbook-cover {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .page-viewer {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.4);
-            min-height: 600px;
+
+        /* Book Viewer Container */
+        .book-viewer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
             position: relative;
-            overflow: hidden;
-            margin-bottom: 20px;
         }
-        
+
+        .book-title {
+            font-family: 'Bangers', cursive;
+            font-size: 3rem;
+            color: #e63946;
+            text-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            text-align: center;
+            transform: rotate(-2deg);
+        }
+
+        /* Book Spine Effect */
+        .book-spine {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%) rotate(0deg);
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(90deg, #1d3557, #457b9d);
+            border-left: 3px solid #000;
+            border-right: 3px solid #000;
+            z-index: 1;
+            transition: all 0.5s ease;
+        }
+
+        /* Book Cover and Pages */
+        .book {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            perspective: 2000px;
+            margin: 0 auto;
+            z-index: 2;
+        }
+
+        .book-cover {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #ffbe0b;
+            border: 5px solid #000;
+            border-radius: 5px 15px 15px 5px;
+            box-shadow: 15px 15px 30px rgba(0,0,0,0.3);
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 1.5s ease;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .book-cover img {
+            max-width: 80%;
+            max-height: 70%;
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+        }
+
+        .book-cover h2 {
+            font-family: 'Bangers', cursive;
+            font-size: 2.5rem;
+            color: #e63946;
+            margin: 20px 0 10px;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            letter-spacing: 2px;
+        }
+
+        .book-cover p {
+            font-size: 1.2rem;
+            margin: 5px 0;
+        }
+
+        .book-cover .creator {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .book-cover .creator-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .book-page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            border: 5px solid #000;
+            border-radius: 5px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            backface-visibility: hidden;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 1s ease;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .page-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
         .page-element {
             position: absolute;
-            pointer-events: none; /* Prevent interaction with elements in view mode */
         }
-        
-        .page-controls {
+
+        /* Navigation Controls */
+        .book-controls {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .nav-area {
+            position: absolute;
+            width: 30%;
+            height: 100%;
+            cursor: pointer;
+            pointer-events: all;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .page-number {
-            font-size: 1.2rem;
-            color: black;
-        }
-        
-        .creator-info {
-            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            margin-bottom: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        
-        .creator-avatar {
-            width: 30px;
-            height: 30px;
+
+        .nav-area:hover {
+            opacity: 1;
+        }
+
+        .prev-area {
+            left: 0;
+        }
+
+        .next-area {
+            right: 0;
+        }
+
+        .nav-icon {
+            font-size: 3rem;
+            color: rgba(0,0,0,0.5);
+            background-color: rgba(255,255,255,0.7);
             border-radius: 50%;
-            object-fit: cover;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(0,0,0,0.5);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
         }
-        
-        .back-button {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #ccc;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            background: rgb(20,42,43);
-            transition: all 0.3s ease;
+
+        .page-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255,255,255,0.8);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 3px solid #000;
+            font-family: 'Bangers', cursive;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
         }
-        
-        .back-button:hover {
-            background: rgb(39, 78, 80);
-            color: white;
-        }
-        button:hover {
-            background: rgb(39, 78, 80);
-            color: white;
-        }
-        /* Page turning animations */
-        @keyframes turnPageRight {
-            0% { transform: perspective(1200px) rotateY(0); }
-            100% { transform: perspective(1200px) rotateY(-180deg); }
-        }
-        
-        @keyframes turnPageLeft {
-            0% { transform: perspective(1200px) rotateY(0); }
-            100% { transform: perspective(1200px) rotateY(180deg); }
-        }
-        
-        .turning-right {
-            animation: turnPageRight 1s ease-in-out;
-            transform-origin: left center;
-        }
-        
-        .turning-left {
-            animation: turnPageLeft 1s ease-in-out;
-            transform-origin: right center;
-        }
-        
-        /* Action buttons */
+
+        /* Action Buttons */
         .scrapbook-actions {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 20px;
+            margin-top: 40px;
+            z-index: 5;
         }
-        
-        .scrapbook-actions button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            background: rgb(20,42,43);
-            border: none;
-            border-radius: 10px;
+
+        .action-button {
+            padding: 12px 25px;
+            font-family: 'Bangers', cursive;
+            font-size: 1.3rem;
+            background-color: #ffbe0b;
+            color: #1d3557;
+            border: 3px solid #000;
+            border-radius: 8px;
             cursor: pointer;
-            color: white;
-            transition: background 0.3s ease;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            letter-spacing: 1px;
+            text-decoration: none;
         }
-        
-        .scrapbook-actions button:hover {
-            background: rgb(39, 78, 80);
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            background-color: #e63946;
+            color: white;
+            box-shadow: 7px 7px 0 rgba(0,0,0,0.3);
+        }
+
+        /* Back Button */
+        .back-button {
+            align-self: flex-start;
+            padding: 10px 20px;
+            background-color: #457b9d;
+            color: white;
+            text-decoration: none;
+            font-family: 'Bangers', cursive;
+            font-size: 1.2rem;
+            border: 3px solid black;
+            border-radius: 8px;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            background-color: #1d3557;
+            box-shadow: 7px 7px 0 rgba(0,0,0,0.3);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 900px) {
+            .book {
+                width: 90vw;
+                height: calc(90vw * 0.75);
+            }
+            
+            .book-title {
+                font-size: 2rem;
+            }
+            
+            .book-cover h2 {
+                font-size: 1.8rem;
+            }
+            
+            .action-button {
+                padding: 10px 15px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .book {
+                height: calc(90vw * 1.2);
+            }
+            
+            .book-cover {
+                padding: 10px;
+            }
+            
+            .book-cover h2 {
+                font-size: 1.5rem;
+                margin: 10px 0;
+            }
+            
+            .scrapbook-actions {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('profile', username=creator.username) }}" class="back-button">← Back to {{ creator.username }}'s Profile</a>
+        <a href="{{ url_for('profile', username=creator.username) }}" class="back-button">← BACK TO PROFILE</a>
         
-        <div class="scrapbook-viewer">
-            <div class="scrapbook-header">
-                <img src="{{ scrapbook.cover_image or url_for('static', filename='images/default_cover.jpg') }}" alt="{{ scrapbook.title }} Cover" class="scrapbook-cover">
-                <h1>{{ scrapbook.title }}</h1>
-                <div class="creator-info">
-                    <img src="{{ url_for('static', filename='uploads/' + creator.profile_image) if creator.get('profile_image') else url_for('static', filename='images/default-profile.jpg') }}" alt="{{ creator.username }}" class="creator-avatar">
-                    <span>Created by: {{ creator.username }}</span>
+        
+        <div class="book-viewer-container">
+            <div class="book-spine"></div>
+            
+            <div class="book" id="book">
+                <!-- Cover will be inserted here by JavaScript -->
+                <!-- Pages will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="book-controls">
+                <div class="nav-area prev-area" onclick="prevPage()">
+                    <div class="nav-icon"><i class="fas fa-chevron-left"></i></div>
                 </div>
+                <div class="nav-area next-area" onclick="nextPage()">
+                    <div class="nav-icon"><i class="fas fa-chevron-right"></i></div>
+                </div>
+                <div class="page-indicator" id="page-indicator">COVER</div>
             </div>
-            
-            <div class="page-viewer" id="page-container">
-                <!-- Page content will be rendered here by JavaScript -->
-            </div>
-            
-            <div class="page-controls">
-                <button onclick="prevPage()">Previous Page</button>
-                <span class="page-number" id="page-number">Page 1 of {{ scrapbook.pages|length }}</span>
-                <button onclick="nextPage()">Next Page</button>
-            </div>
-            
-            {% if session.get("user_id") == scrapbook.user_id %}
-            <div class="scrapbook-actions">
-                <a href="{{ url_for('edit_scrapbook', scrapbook_id=scrapbook._id) }}"><button>Edit Scrapbook</button></a>
-                <button onclick="deleteScrapbook('{{ scrapbook._id }}')">Delete Scrapbook</button>
-            </div>
-            {% endif %}
         </div>
+        
+        {% if session.get("user_id") == scrapbook.user_id %}
+        <div class="scrapbook-actions">
+            <a href="{{ url_for('edit_scrapbook', scrapbook_id=scrapbook._id) }}" class="action-button">EDIT SCRAPBOOK</a>
+            <button class="action-button" onclick="deleteScrapbook('{{ scrapbook._id }}')">DELETE SCRAPBOOK</button>
+        </div>
+        {% endif %}
     </div>
 
     <script>
         // Scrapbook data from server
         const scrapbookData = {{ scrapbook|tojson|safe }};
-        let currentPageIndex = 0;
+        let currentPageIndex = -1; // -1 means cover is showing
+        let bookElement = document.getElementById('book');
+        let spineElement = document.querySelector('.book-spine');
+        
+        // Create book cover
+        function createCover() {
+            const cover = document.createElement('div');
+            cover.className = 'book-cover';
+            cover.id = 'book-cover';
+            cover.innerHTML = `
+                <img src="{{ scrapbook.cover_image or url_for('static', filename='images/default_cover.jpg') }}" 
+                     alt="{{ scrapbook.title }} Cover">
+                <h2>{{ scrapbook.title }}</h2>
+                
+            `;
+            bookElement.appendChild(cover);
+            
+            // Auto-flip cover after 2 seconds
+            setTimeout(() => {
+                flipCover();
+            }, 2000);
+        }
+        
+        // Flip the cover to reveal first page
+        function flipCover() {
+            const cover = document.getElementById('book-cover');
+            if (cover) {
+                cover.style.transform = 'rotateY(-160deg)';
+                spineElement.style.transform = 'translateX(-50%) rotateY(30deg)';
+                
+                setTimeout(() => {
+                    cover.style.display = 'none';
+                    spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
+                    renderPage(0);
+                }, 1500);
+            }
+        }
+        
+        // Create all pages
+        function createPages() {
+            scrapbookData.pages.forEach((page, index) => {
+                const pageElement = document.createElement('div');
+                pageElement.className = 'book-page';
+                pageElement.id = `page-${index}`;
+                pageElement.style.display = 'none';
+                pageElement.style.zIndex = 100 - index;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'page-content';
+                contentDiv.id = `page-content-${index}`;
+                pageElement.appendChild(contentDiv);
+                
+                bookElement.appendChild(pageElement);
+            });
+        }
         
         // Render the current page
         function renderPage(pageIndex) {
             if (pageIndex < 0 || pageIndex >= scrapbookData.pages.length) return;
             
+            // Hide current page
+            if (currentPageIndex >= 0) {
+                document.getElementById(`page-${currentPageIndex}`).style.display = 'none';
+            }
+            
             currentPageIndex = pageIndex;
             const page = scrapbookData.pages[currentPageIndex];
-            const container = document.getElementById('page-container');
+            const container = document.getElementById(`page-content-${currentPageIndex}`);
             
             // Clear previous content
             container.innerHTML = '';
@@ -210,7 +433,6 @@
                     container.style.backgroundPosition = 'center';
                 }
             } else {
-                // For backwards compatibility with old format
                 container.style.backgroundColor = page.background || '#ffffff';
             }
             
@@ -230,7 +452,7 @@
                 if (element.type === 'text') {
                     el.innerHTML = element.content;
                     if (element.style) {
-                        el.style.fontFamily = element.style.fontFamily || 'Arial';
+                        el.style.fontFamily = element.style.fontFamily || 'Comic Neue';
                         el.style.fontSize = element.style.fontSize || '16px';
                         el.style.color = element.style.color || '#000000';
                         el.style.textAlign = element.style.textAlign || 'left';
@@ -255,33 +477,61 @@
                 container.appendChild(el);
             });
             
-            // Update page number display
-            document.getElementById('page-number').textContent = `Page ${currentPageIndex + 1} of ${scrapbookData.pages.length}`;
+            // Show current page
+            document.getElementById(`page-${currentPageIndex}`).style.display = 'block';
+            
+            // Update page indicator
+            document.getElementById('page-indicator').textContent = 
+                `PAGE ${currentPageIndex + 1} OF ${scrapbookData.pages.length}`;
         }
         
-        // Navigate to previous page
+        // Navigate to previous page with animation
         function prevPage() {
             if (currentPageIndex > 0) {
-                const container = document.getElementById('page-container');
-                container.classList.add('turning-left');
+                const currentPage = document.getElementById(`page-${currentPageIndex}`);
+                currentPage.style.transform = 'rotateY(160deg)';
+                spineElement.style.transform = 'translateX(-50%) rotateY(-30deg)';
                 
                 setTimeout(() => {
+                    currentPage.style.display = 'none';
+                    currentPage.style.transform = 'rotateY(0deg)';
+                    spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
                     renderPage(currentPageIndex - 1);
-                    container.classList.remove('turning-left');
-                }, 800);
+                }, 1000);
+            } else if (currentPageIndex === 0) {
+                // Go back to cover
+                const currentPage = document.getElementById(`page-${currentPageIndex}`);
+                currentPage.style.transform = 'rotateY(160deg)';
+                spineElement.style.transform = 'translateX(-50%) rotateY(-30deg)';
+                
+                setTimeout(() => {
+                    currentPage.style.display = 'none';
+                    currentPage.style.transform = 'rotateY(0deg)';
+                    document.getElementById('book-cover').style.display = 'flex';
+                    document.getElementById('book-cover').style.transform = 'rotateY(0deg)';
+                    spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
+                    currentPageIndex = -1;
+                    document.getElementById('page-indicator').textContent = 'COVER';
+                }, 1000);
             }
         }
         
-        // Navigate to next page
+        // Navigate to next page with animation
         function nextPage() {
-            if (currentPageIndex < scrapbookData.pages.length - 1) {
-                const container = document.getElementById('page-container');
-                container.classList.add('turning-right');
+            if (currentPageIndex === -1) {
+                // Flip cover to first page
+                flipCover();
+            } else if (currentPageIndex < scrapbookData.pages.length - 1) {
+                const currentPage = document.getElementById(`page-${currentPageIndex}`);
+                currentPage.style.transform = 'rotateY(-160deg)';
+                spineElement.style.transform = 'translateX(-50%) rotateY(30deg)';
                 
                 setTimeout(() => {
+                    currentPage.style.display = 'none';
+                    currentPage.style.transform = 'rotateY(0deg)';
+                    spineElement.style.transform = 'translateX(-50%) rotateY(0deg)';
                     renderPage(currentPageIndex + 1);
-                    container.classList.remove('turning-right');
-                }, 800);
+                }, 1000);
             }
         }
         
@@ -306,9 +556,19 @@
             }
         }
         
-        // Initialize the first page on load
+        // Initialize the book viewer
         document.addEventListener('DOMContentLoaded', () => {
-            renderPage(0);
+            createCover();
+            createPages();
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    prevPage();
+                } else if (e.key === 'ArrowRight') {
+                    nextPage();
+                }
+            });
         });
     </script>
 </body>

@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paws - Home</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Include a comic book specific font -->
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
   <style>
-    body {
-    animation: slideInRight 0.5s ease-out forwards;
-  }
     * {
       margin: 0;
       padding: 0;
@@ -17,8 +16,8 @@
     }
 
     body {
-      font-family: 'Bricolage Grotesque', sans-serif;
-      background: rgb(57, 130, 133);
+      font-family: 'Comic Neue', cursive;
+      background-color: #ffeb3b;
       color: white;
       min-height: 100vh;
       display: flex;
@@ -26,57 +25,287 @@
       align-items: center;
       position: relative;
       overflow: hidden;
+      background-image: 
+        radial-gradient(circle, #ff5722 2px, transparent 3px),
+        radial-gradient(circle, #2196f3 2px, transparent 3px);
+      background-size: 60px 60px;
+      background-position: 0 0, 30px 30px;
     }
 
-    .center-text {
-  font-size: 34vw;
-  font-weight: 800;
-  background-image: url('static/images/fill.jpg');
-  background-size: 1000px auto;
-  background-repeat: repeat-x;
-  background-position: 0 center;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  text-align: center;
-  line-height: 0.9;
-  animation: scrollBackground 10s linear infinite;
+    .comic-border {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      border: 8px solid #000;
+      border-radius: 2px;
+      box-shadow: 
+        0 0 0 8px #fff,
+        0 0 0 16px #000;
+      pointer-events: none;
+      opacity: 0;
+      animation: fadeIn 1s ease-out 2.8s forwards;
+    }
 
-  /* Outline the letters for visibility */
-  -webkit-text-stroke: 2px #000000; /* white border */
-  text-stroke: 2px #000000; /* for future browser support */
-}
+    .center-text-container {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
+    .paws-container {
+      position: relative;
+      perspective: 1000px;
+    }
+
+    /* Individual letter styles */
+    .paws-letter {
+      position: relative;
+      display: inline-block;
+      font-family: 'Bangers', cursive;
+      font-size: 29vw;
+      line-height: 0.9;
+      color: #fff;
+      letter-spacing: 0.02em;
+      -webkit-text-stroke: 6px #000;
+      text-stroke: 6px #000;
+      filter: drop-shadow(5px 5px 0 rgba(0,0,0,0.5));
+      opacity: 0;
+      transform: scale(0.1) rotate(-45deg);
+    }
+
+    .paws-letter:nth-child(1) {
+      animation: popLetter 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67) 1.3s forwards;
+    }
+    .paws-letter:nth-child(2) {
+      animation: popLetter 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67) 1.5s forwards;
+    }
+    .paws-letter:nth-child(3) {
+      animation: popLetter 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67) 1.7s forwards;
+    }
+    .paws-letter:nth-child(4) {
+      animation: popLetter 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67) 1.9s forwards;
+    }
+
+    /* Pattern fill on each letter - MODIFIED TO USE DIFFERENT IMAGES */
+    .paws-letter::before {
+      content: attr(data-letter);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      z-index: 1;
+    }
+
+    /* Custom image for each letter */
+    .paws-letter:nth-child(1)::before {
+      background-image: url('static/images/p_.jpg');
+      background-size: cover;
+      background-position: center;
+      width: 115%;
+
+    }
+
+    .paws-letter:nth-child(2)::before {
+      background-image: url('static/images/a.jpg');
+      background-size: cover;
+      background-position: center;
+
+      /* Different pattern, like cat stripes */
+    }
+
+    .paws-letter:nth-child(3)::before {
+      background-image: url('static/images/w.jpg');
+      background-size: cover;
+      background-position: center;
+      width: 120%;
+      height: 100%;
+
+      /* Different pattern, like dog spots */
+    }
+
+    .paws-letter:nth-child(4)::before {
+      background-image: url('static/images/s.jpg');
+      background-size: cover;
+      background-position: center;
+      width: 120%;
+      height: 100%;
+    }
+
+    /* Improved explosion effect */
+    .explosion {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 130%;
+      height: 130%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><path fill="%23FFEB3B" stroke="%23000" stroke-width="6" d="M150,10 L170,60 L225,25 L190,80 L290,100 L190,120 L225,175 L170,140 L150,290 L130,140 L75,175 L110,120 L10,100 L110,80 L75,25 L130,60 z"/></svg>');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      z-index: -1;
+      opacity: 0;
+      animation: explode 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67) 1s forwards;
+    }
+
+    .small-explosion {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FF9800" stroke="%23000" stroke-width="3" d="M50,5 L57,25 L75,15 L65,35 L95,40 L65,45 L75,65 L57,55 L50,95 L43,55 L25,65 L35,45 L5,40 L35,35 L25,15 L43,25 z"/></svg>');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0;
+      transform: scale(0);
+    }
+
+    .small-explosion:nth-child(1) {
+      top: -20%;
+      left: 20%;
+      animation: popSmallExplosion 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67) 2.2s forwards;
+    }
+
+    .small-explosion:nth-child(2) {
+      top: 30%;
+      right: -10%;
+      animation: popSmallExplosion 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67) 2.3s forwards;
+    }
+
+    .small-explosion:nth-child(3) {
+      bottom: -10%;
+      left: 30%;
+      animation: popSmallExplosion 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67) 2.4s forwards;
+    }
+
+    /* Improved speech bubble */
+    .speech-bubble {
+      position: absolute;
+      top: -18px;  /* Adjusted position */
+      left: 100%;
+      rotate: 19deg;
+      transform: translateX(-50%) translateY(-100%) rotate(-5deg);
+      background-color: #fff;
+      border: 5px solid #000;
+      border-radius: 50% 50% 50% 20% / 60% 60% 40% 40%;
+      padding: 15px 25px;
+      font-family: 'Bangers', cursive;
+      font-size: 28px;
+      color: #000;
+      filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3));
+      z-index: 10;
+      opacity: 0;
+      white-space: nowrap;
+      animation: dropBubble 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 2.2s forwards;
+    }
+
+    .speech-bubble:after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      margin-left: -10px;
+      width: 30px;
+      height: 30px;
+      background-color: #fff;
+      border-right: 5px solid #000;
+      border-bottom: 5px solid #000;
+      transform: rotate(45deg);
+      z-index: -1;
+    }
+
+    /* Action lines and speed effect */
+    .action-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      opacity: 0;
+      animation: fadeIn 0.3s ease-out 2s forwards;
+    }
+
+    .action-line {
+      position: absolute;
+      background-color: #000;
+      transform-origin: center;
+    }
+
+    .action-line:nth-child(1) {
+      width: 100%;
+      height: 3px;
+      top: 20%;
+      transform: rotate(5deg);
+    }
+
+    .action-line:nth-child(2) {
+      width: 100%;
+      height: 3px;
+      top: 40%;
+      transform: rotate(-3deg);
+    }
+
+    .action-line:nth-child(3) {
+      width: 100%;
+      height: 3px;
+      top: 60%;
+      transform: rotate(2deg);
+    }
+
+    .action-line:nth-child(4) {
+      width: 100%;
+      height: 3px;
+      top: 80%;
+      transform: rotate(-4deg);
+    }
 
     .fixed-action-btn {
       position: fixed;
       bottom: 30px;
       right: 30px;
       z-index: 100;
+      opacity: 0;
+      animation: slideUpButton 0.5s ease-out 3s forwards;
     }
 
     .btn-floating {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
-      background-color: transparent;
+      background-color: #ff5722;
       cursor: pointer;
       position: relative;
       z-index: 2;
       transition: transform 0.3s ease;
+      border: 4px solid #000;
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    }
+
+    .btn-floating:active {
+      transform: translate(3px, 3px);
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
     }
 
     .fixed-action-btn ul {
       position: absolute;
-      bottom: 70px;
+      bottom: 80px;
       right: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 15px;
       opacity: 0;
       visibility: hidden;
       transform: translateY(10px);
@@ -95,26 +324,34 @@
     }
 
     .menu-option {
-      background: blanchedalmond;
+      background: #fff;
       color: black;
       padding: 10px 15px;
       border-radius: 20px;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 700;
       text-align: center;
       transition: all 0.2s ease;
       white-space: nowrap;
       display: inline-block;
+      border: 3px solid #000;
+      box-shadow: 3px 3px 0 #000;
+      font-family: 'Comic Neue', cursive;
     }
 
     .menu-option:hover {
-      background: white;
+      background: #e0f7fa;
       transform: scale(1.05);
     }
 
+    .menu-option:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #000;
+    }
+
     .paw-icon {
-      width: 60px;
-      height: 60px;
+      width: 45px;
+      height: 45px;
       transition: transform 0.3s ease;
     }
 
@@ -122,22 +359,8 @@
       width: 30px;
       height: 30px;
       border-radius: 100%;
-    }
-
-    .fab-close-line-length {
-      width: 1.64rem;
-    }
-
-    .fab-close-line-thickness {
-      height: 2px;
-    }
-
-    .fab-close-animation-time {
-      transition-duration: 0.3s;
-    }
-
-    .fixed-action-btn.spin-close .btn-floating {
-      position: sticky;
+      margin-right: 5px;
+      vertical-align: middle;
     }
 
     .fixed-action-btn.spin-close .btn-floating .paw-icon {
@@ -151,11 +374,11 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 1.64rem;
-      height: 2px;
-      background: white;
+      width: 24px;
+      height: 4px;
+      background: #000;
       margin-top: -2px;
-      margin-left: -0.82rem;
+      margin-left: -12px;
       transform: rotate(0);
       opacity: 0;
       transition: transform 0.3s, opacity 0.3s;
@@ -175,55 +398,263 @@
       transform: rotate(135deg);
     }
 
+    .action-label {
+      position: absolute;
+      background: #fff;
+      border: 3px solid #000;
+      padding: 5px 10px;
+      font-family: 'Bangers', cursive;
+      font-size: 18px;
+      color: #000;
+      border-radius: 10px;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .btn-floating:hover .action-label {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Initial loading animation */
+    .initial-animation {
+      position: fixed;
+      top: 40;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: initialFade 1s ease-out 0.5s forwards;
+    }
+
+    .loading-text {
+      font-family: 'Bangers', cursive;
+      font-size: 8vw;
+      color: #fff;
+      text-align: center;
+      animation: pulseText 0.6s infinite alternate;
+    }
+
+    /* Animation keyframes */
     @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(20px);
       }
-
       to {
         opacity: 1;
-        transform: translateY(0);
       }
     }
-    /* Add this keyframe animation */
-@keyframes scrollBackground {
-  0% {
-    background-position: 0 center;
-  }
-  100% {
-    background-position: -100% center;
-  }
-}
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
+
+    @keyframes initialFade {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    @keyframes popLetter {
+      0% {
+        transform: scale(0.1) rotate(-45deg);
+        opacity: 0;
+      }
+      70% {
+        transform: scale(1.3) rotate(15deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes pulseText {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.1);
+      }
+    }
+
+    @keyframes explode {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+      40% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    @keyframes popSmallExplosion {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 0;
+      }
+    }
+
+    @keyframes dropBubble {
+      0% {
+        transform: translateX(-50%) translateY(-100%) rotate(-15deg);
+        opacity: 0;
+      }
+      50% {
+        transform: translateX(-50%) translateY(10%) rotate(10deg);
+      }
+      75% {
+        transform: translateX(-50%) translateY(-5%) rotate(-5deg);
+      }
+      100% {
+        transform: translateX(-50%) translateY(0%) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUpButton {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .paws-letter {
+        font-size: 25vw;
+        -webkit-text-stroke: 4px #000;
+        text-stroke: 4px #000;
+      }
+
+      .speech-bubble {
+        font-size: 22px;
+        top: -110px;
+        padding: 10px 20px;
+      }
+
+      .comic-border {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        border-width: 6px;
+        box-shadow: 
+          0 0 0 6px #fff,
+          0 0 0 12px #000;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .paws-letter {
+        font-size: 30vw;
+        -webkit-text-stroke: 3px #000;
+        text-stroke: 3px #000;
+      }
+
+      .speech-bubble {
+        font-size: 18px;
+        top: -100px;
+        padding: 8px 16px;
+        border-width: 4px;
+      }
+
+      .btn-floating {
+        width: 60px;
+        height: 60px;
+      }
+
+      .paw-icon {
+        width: 35px;
+        height: 35px;
+      }
+
+      .menu-option {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+
+      .comic-border {
+        border-width: 4px;
+        box-shadow: 
+          0 0 0 4px #fff,
+          0 0 0 8px #000;
+      }
+    }
   </style>
 </head>
 
-<body class="slide-in">
-  <div class="center-text">PAWS</div>
+<body>
+  <!-- Initial loading animation -->
+  <div class="initial-animation">
+    <div class="loading-text">LOADING COMIC WORLD...</div>
+  </div>
+
+  <div class="comic-border"></div>
+  
+  <div class="center-text-container">
+    <!-- Action lines for speed effect -->
+    <div class="action-lines">
+      <div class="action-line"></div>
+      <div class="action-line"></div>
+      <div class="action-line"></div>
+      <div class="action-line"></div>
+    </div>
+    
+    <!-- Better positioned speech bubble -->
+    <div class="speech-bubble">WELCOME TO!</div>
+    
+    <div class="paws-container">
+      <!-- PAWS text with individual letters for better animation -->
+      <span class="paws-letter" data-letter="P">P</span>
+      <span class="paws-letter" data-letter="A">A</span>
+      <span class="paws-letter" data-letter="W">W</span>
+      <span class="paws-letter" data-letter="S">S</span>
+      
+      <!-- Main explosion effect -->
+      <div class="explosion"></div>
+      
+      <!-- Additional small explosions -->
+      <div class="small-explosion"></div>
+      <div class="small-explosion"></div>
+      <div class="small-explosion"></div>
+    </div>
+  </div>
 
   <div class="fixed-action-btn spin-close">
     <a class="btn-floating">
       <img src="{{ url_for('static', filename='images/paw.png') }}" alt="Menu" class="paw-icon">
+      <span class="action-label">MENU!</span>
     </a>
     <ul>
       <li>
         <a href="{{ url_for('profile', username=user.username) }}" class="menu-option">
-          <img src="static/images/profile.png" class="icons">
+          <img src="static/images/profile.png" class="icons"> PROFILE
         </a>
       </li>
       <li>
         <a href="{{ url_for('marketplace') }}" class="menu-option">
-          <img src="static/images/marketplace.png" class="icons">
+          <img src="static/images/marketplace.png" class="icons"> MARKET
         </a>
       </li>
     </ul>
@@ -236,6 +667,19 @@
 
       fabButton.addEventListener('click', function () {
         fab.classList.toggle('active');
+        
+        // Menu toggle animation only
+        if (fab.classList.contains('active')) {
+          // Add subtle animation to menu button
+          fabButton.style.transition = 'all 0.3s ease';
+          fabButton.style.transform = 'scale(1.1)';
+          
+          setTimeout(() => {
+            fabButton.style.transform = 'rotate(15deg)';
+          }, 100);
+        } else {
+          fabButton.style.transform = 'scale(1)';
+        }
       });
     });
   </script>

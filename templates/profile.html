@@ -2,336 +2,452 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ user.username }}'s Profile</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Comic Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Bubblegum+Sans&family=Permanent+Marker&display=swap" rel="stylesheet">
     <style>
+        /* Base Styles with New Color Scheme */
         body, html {
-            font-family: 'Roboto Slab', serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Comic Neue', cursive;
+            background-color: #ffeb3b;
+            color: #1d3557;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle, #ff5722 2px, transparent 3px),
+                radial-gradient(circle, #2196f3 2px, transparent 3px);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Comic Book Layout - All Rectangular Panels */
+        .comic-page {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: minmax(250px, auto);
+            gap: 25px;
+            position: relative;
+        }
+
+        /* Panel Styling with Consistent Rectangular Shape */
+        .comic-panel {
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+        }
+
+        /* Color Classes Using New Scheme */
+        .panel-red {
+            background-color: #e63946;
+            color: #f1faee;
+        }
+
+        .panel-blue {
+            background-color: #457b9d;
+            color: #f1faee;
+        }
+
+        .panel-yellow {
+            background-color: #ffbe0b;
+            color: #1d3557;
+        }
+
+        .panel-navy {
+            background-color: #1d3557;
+            color: #f1faee;
+        }
+
+        .panel-light {
+            background-color: #f1faee;
+            color: #1d3557;
+        }
+
+        /* Profile Panel Styling */
+        .profile-panel {
+            grid-column: 1 / 3;
+            grid-row: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #457b9d, #1d3557);
+        }
+
+        .profile-image-container {
             width: 100%;
             height: 100%;
-            background-color: rgb(57, 130, 133);
-            color: black;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            opacity: 0.15;
         }
-        
-        .container {
-            max-width: 1700px;
+
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            z-index: 2;
+            position: relative;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Speech Bubble for Username */
+        .speech-bubble {
+            position: relative;
+            background: #f1faee;
+            border-radius: 25px;
+            padding: 20px;
+            border: 3px solid #000;
+            max-width: 90%;
             margin: 0 auto;
-            padding: 40px 20px;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+            transform: rotate(-1deg);
         }
-        
-        .scrapbook-grid {
+
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 15px solid transparent;
+            border-top-color: #f1faee;
+            border-bottom: 0;
+        }
+
+        .speech-bubble:before {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 18px solid transparent;
+            border-top-color: #000;
+            border-bottom: 0;
+        }
+
+        .profile-username {
+            font-family: 'Bangers', cursive;
+            font-size: 2.8rem;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px #1d3557;
+            color: #e63946;
+        }
+
+        .profile-description {
+            color: #1d3557;
+            font-family: 'Comic Neue', cursive;
+            text-shadow: 1px 1px 0px #f1faee;
+            margin: 20px 0 0 0;
+            font-weight: bold;
+            background: rgba(241, 250, 238, 0.9);
+            padding: 12px;
+            border-radius: 10px;
+            border: 3px solid #000;
+            font-size: 1.1rem;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            transform: rotate(1deg);
+        }
+
+        /* Action Buttons */
+        .action-button {
+            padding: 12px 25px;
+            background-color: #ffbe0b;
+            color: #1d3557;
+            border: 3px solid #000;
+            border-radius: 12px;
+            font-weight: bold;
+            font-family: 'Bangers', cursive;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            z-index: 2;
+            position: relative;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px) rotate(-1deg);
+            box-shadow: 7px 7px 0px rgba(0,0,0,0.4);
+            background-color: #e63946;
+            color: #f1faee;
+        }
+
+        /* Create Panel */
+        .create-panel {
+            grid-column: 3;
+            grid-row: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #e63946;
+        }
+
+        .create-panel:hover {
+            transform: scale(1.05) rotate(-1deg);
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
+        }
+
+        .create-icon {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 5rem;
+            margin-bottom: 15px;
+            color: #ffbe0b;
+            text-shadow: 4px 4px 0px #1d3557;
+            z-index: 1;
+        }
+
+        .create-text {
+            font-family: 'Bangers', cursive;
+            color: #f1faee;
+            text-align: center;
+            font-size: 2.2rem;
+            margin: 0;
+            text-shadow: 3px 3px 0px #1d3557;
+            z-index: 1;
+            letter-spacing: 2px;
+        }
+
+        .create-description {
+            color: #f1faee;
+            font-family: 'Bubblegum Sans', cursive;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px rgba(29, 53, 87, 0.5);
+            z-index: 1;
+            font-size: 1.2rem;
+        }
+
+        /* Scrapbooks Container */
+        .scrapbooks-container {
+            grid-column: 1 / 4;
+            grid-row: 2;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 40px 30px;
+            background: #f1faee;
+            border: 3px solid #000;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
         }
-        
+
+        /* Scrapbook Card Styling */
         .scrapbook-card {
             position: relative;
-            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
-            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
-            background-color: #cfc8c8;
-            height: 410px;
-            width:270px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 380px;
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.25);
+            transform: rotate(-1deg);
+            background: #fff;
+        }
+
+        .scrapbook-card:nth-child(even) {
+            transform: rotate(1deg);
+        }
+
+        .scrapbook-card:hover {
+            transform: scale(1.05) rotate(0);
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        .scrapbook-img-hover {
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            border-bottom: 3px solid #000;
+        }
+
+        .scrapbook-info {
+            background: #fff;
+            padding: 20px;
+            flex: 1;
             display: flex;
             flex-direction: column;
         }
-        
-        @media (max-width: 992px) {
-            .scrapbook-card {
-                width: calc(50% - 13px);
-            }
+
+        .scrapbook-category {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #457b9d;
+            margin-bottom: 8px;
         }
-        
-        @media (max-width: 768px) {
-            .scrapbook-card {
-                width: 100%;
-            }
+
+        .scrapbook-title {
+            font-family: 'Bangers', cursive;
+            font-size: 1.8rem;
+            margin: 0 0 12px 0;
+            color: #1d3557;
+            letter-spacing: 1px;
         }
-        
-        .scrapbook-card:hover {
-            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
-            transform: scale(1.05, 1.05);
+
+        .scrapbook-description {
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            font-family: 'Comic Neue', cursive;
         }
-        
-        .scrapbook-img {
-            visibility: hidden;
-            width: 100%;
-            height: 235px;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+
+        .scrapbook-by {
+            font-size: 0.85rem;
+            color: #457b9d;
+            font-family: 'Comic Neue', cursive;
         }
-        
-        .scrapbook-info-hover {
+
+        .scrapbook-badge {
             position: absolute;
-            padding: 16px;
-            width: 100%;
-            opacity: 0;
-            top: 0;
-            z-index: 3;
-            transition: 0.2s all ease-out;
+            top: 15px;
+            right: 15px;
+            background: #e63946;
+            color: white;
+            padding: 7px 15px;
+            font-weight: bold;
+            transform: rotate(5deg);
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.3);
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+            z-index: 2;
         }
-        
-        .scrapbook-img-hover {
-            transition: 0.2s all ease-out;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            width: 100%;
-            position: absolute;
-            height: 250px;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            top: 0;
-        }
-        
+
         .card-link {
             text-decoration: none;
             color: inherit;
             display: block;
             height: 100%;
         }
-        
-        .scrapbook-info {
-            z-index: 2;
-            background-color: blanchedalmond;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-            padding: 16px 24px 24px 24px;
-        }
-        
-        .scrapbook-category {
-            font-family: 'Raleway', sans-serif;
-            text-transform: uppercase;
-            font-size: 13px;
-            letter-spacing: 2px;
-            font-weight: 500;
-            color: #868686;
-        }
-        
-        .scrapbook-title {
-            margin-top: 5px;
-            margin-bottom: 10px;
-            font-family: 'Roboto Slab', serif;
-            font-size: 1.3rem;
-            color: black;
-            font-weight: 600;
-        }
-        
-        .scrapbook-meta {
-            display: flex;
-            justify-content: space-between;
-            color: #000000;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-        
-        .scrapbook-description {
-            color: #1a1919;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-        
-        .updated-at {
-            font-size: 0.8rem;
-            color: #777;
-            margin-top: 5px;
-        }
-        
-        .scrapbook-by {
-            font-size: 12px;
-            font-family: 'Raleway', sans-serif;
-            font-weight: 500;
-            color: #302f2f;
-        }
-        
-        .scrapbook-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            z-index: 4;
-        }
-        
-        .scrapbook-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .scrapbook-actions button {
-            flex: 1;
-            padding: 8px 0;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #333;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-        
-        .scrapbook-actions button:hover {
-            background-color: rgb(39, 78, 80);
-        }
-        
-        .scrapbook-card:hover .scrapbook-img-hover {
-            height: 100%;
-            opacity: 0.3;
-        }
-        
-        .scrapbook-card:hover .scrapbook-info {
-            background-color: transparent;
-            position: relative;
-        }
-        
-        .scrapbook-card:hover .scrapbook-info-hover {
-            opacity: 1;
-        }
-        
-        .create-scrapbook {
+
+        /* Sell Panel */
+        .sell-panel {
+            grid-column: 1;
+            grid-row: 3;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: blanchedalmond;
-            border-radius: 12px;
-            padding: 30px;
-            cursor: pointer;
-            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
-            height: 350px;
-            width:230px;
-            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
+            background-color: #ffbe0b;
         }
-        
-        .create-scrapbook:hover {
-            transform: scale(1.05, 1.05);
-            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
-            background: rgb(207, 202, 195);
-        }
-        
-        .create-icon {
-            font-size: 3rem;
+
+        .sell-icon {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 4rem;
             margin-bottom: 15px;
-            color: #070707;
+            color: #e63946;
+            text-shadow: 3px 3px 0px #1d3557;
+            z-index: 1;
         }
-        
-        .profile-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 40px;
-            gap: 30px;
-        }
-        
-        .profile-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #333;
-        }
-        
-        .profile-info {
-            text-align: left;
-            flex: 1;
-        }
-        
-        .profile-username {
-            font-size: 2rem;
-            margin: 0 0 10px 0;
-        }
-        
-        .profile-description {
-            color: #000000;
-            margin-bottom: 15px;
-        }
-        
-        .profile-actions button {
-            padding: 8px 20px;
-            background-color: rgb(20,42,43);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        .profile-actions button:hover {
-            background-color: rgb(39, 78, 80);
-        }
-        
-        .no-scrapbooks {
+
+        .sell-text {
+            font-family: 'Bangers', cursive;
+            color: #1d3557;
             text-align: center;
-            color: #999;
-            padding: 60px 0;
-            background: #222;
-            border-radius: 15px;
-            margin-top: 30px;
+            font-size: 2rem;
+            margin: 0;
+            text-shadow: 2px 2px 0px rgba(241, 250, 238, 0.7);
+            z-index: 1;
+            letter-spacing: 2px;
         }
-        
+
+        /* Back Button */
         .back-button {
             display: inline-block;
-            margin-top: 30px;
-            color: #000000;
+            margin-top: 40px;
+            margin-left: 30px;
+            padding: 12px 25px;
+            background: #1d3557;
+            color: #f1faee;
             text-decoration: none;
-            transition: color 0.3s ease;
+            font-family: 'Bangers', cursive;
+            font-size: 1.3rem;
+            border: 3px solid #000;
+            border-radius: 12px;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
         }
-        
+
         .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 7px 7px 0px rgba(0,0,0,0.4);
+            background: #e63946;
+        }
+
+        /* Delete Button */
+        .delete-scrapbook-btn {
+            background: #e63946;
             color: white;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            padding: 5px 12px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.3);
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
         }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+
+        .delete-scrapbook-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.4);
+            background: #1d3557;
         }
-        
-        .section-header h2 {
-            margin: 0;
-            font-family: 'Roboto Slab', serif;
-        }
-        
-        /* Clock and like icons */
-        .scrapbook-clock, .scrapbook-like {
-            width: 15px;
-            height: 15px;
-            fill: #AD7D52;
-            vertical-align: middle;
-        }
-        
-        .scrapbook-time {
-            font-size: 12px;
-            color: #AD7D52;
-            vertical-align: middle;
-            margin-left: 5px;
-        }
-        
-        .scrapbook-clock-info {
-            float: right;
-        }
-        
-        /* Dialog styles for delete confirmation */
+
+        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(29, 53, 87, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -340,212 +456,526 @@
             visibility: hidden;
             transition: all 0.3s ease;
         }
-        
+
         .modal-overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        
+
         .modal-content {
-            background: #222;
-            border-radius: 15px;
-            padding: 30px;
+            background: #f1faee;
+            border: 3px solid #000;
+            border-radius: 20px;
+            padding: 35px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transform: translateY(-20px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            transform: translateY(-30px) scale(0.95);
             transition: all 0.3s ease;
         }
-        
+
         .modal-overlay.active .modal-content {
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
-        
+
         .modal-title {
+            font-family: 'Bangers', cursive;
             margin-top: 0;
-            color: white;
+            font-size: 2.2rem;
+            color: #e63946;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
         }
-        
+
         .modal-buttons {
             display: flex;
             justify-content: flex-end;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 20px;
+            margin-top: 30px;
         }
-        
+
         .modal-buttons button {
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: 3px solid #000;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            font-family: 'Bangers', cursive;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
         }
-        
+
+        .modal-buttons button:hover {
+            transform: translateY(-3px);
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.3);
+        }
+
         .btn-cancel {
-            background: #444;
-            color: white;
+            background: #457b9d;
+            color: #f1faee;
         }
-        
+
         .btn-delete {
-            background: #e74c3c;
+            background: #e63946;
+            color: #f1faee;
+        }
+
+        /* Sound Effects */
+        .sound-effect {
+            position: absolute;
+            font-family: 'Bangers', cursive;
+            color: #ffbe0b;
+            text-shadow: 3px 3px 0 #1d3557, -1px -1px 0 #1d3557, 1px -1px 0 #1d3557, -1px 1px 0 #1d3557;
+            z-index: 3;
+            transform: rotate(-15deg);
+            font-size: 2rem;
+            letter-spacing: 1px;
+            background: rgba(241, 250, 238, 0.2);
+            padding: 5px 15px;
+            border-radius: 50%;
+            border: 3px solid #1d3557;
+        }
+
+        .sound-effect-1 {
+            top: 20px;
+            right: 40px;
+        }
+
+        .sound-effect-2 {
+            bottom: 40px;
+            left: 30px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / 4;
+            text-align: center;
+            padding: 60px 20px;
+            background: #f1faee;
+            border: 3px dashed #457b9d;
+        }
+
+        .empty-state h3 {
+            font-family: 'Bangers', cursive;
+            font-size: 2.5rem;
+            color: #1d3557;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.3rem;
+            color: #457b9d;
+            margin-bottom: 30px;
+        }
+
+        /* FAB Button Styles */
+        .fixed-action-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            opacity: 1;
+        }
+
+        .btn-floating {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #ff5722;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+            border: 4px solid #000;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
             color: white;
+            font-family: 'Bangers', cursive;
+            text-decoration: none;
+        }
+
+        .btn-floating:hover {
+            transform: scale(1.1) rotate(5deg);
+            background-color: #e63946;
+        }
+
+        .btn-floating img.paw-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .fixed-action-btn ul {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .fixed-action-btn.active ul {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+       .menu-option {
+      background: #fff;
+      color: black;
+      padding: 10px 15px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: inline-block;
+      border: 3px solid #000;
+      box-shadow: 3px 3px 0 #000;
+      font-family: 'Comic Neue', cursive;
+    }
+
+    .menu-option:hover {
+      background: #e0f7fa;
+      transform: scale(1.05);
+    }
+
+    .menu-option:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #000;
+    }
+
+        .menu-option img.icons {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .comic-page {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-panel {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            
+            .create-panel {
+                grid-column: 1;
+                grid-row: 2;
+            }
+            
+            .sell-panel {
+                grid-column: 1;
+                grid-row: 3;
+            }
+            
+            .scrapbooks-container {
+                grid-column: 1;
+                grid-row: 4;
+            }
+            
+            .profile-username {
+                font-size: 2.2rem;
+            }
+            
+            .create-text, .sell-text {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px 10px;
+            }
+            
+            .comic-page {
+                gap: 15px;
+            }
+            
+            .profile-panel {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px 10px;
+            }
+            
+            .scrapbooks-container {
+                grid-template-columns: 1fr;
+                padding: 25px 15px;
+            }
+            
+            .profile-username {
+                font-size: 1.8rem;
+            }
+            
+            .profile-description {
+                font-size: 1rem;
+                max-width: 95%;
+            }
+            
+            .create-text, .sell-text {
+                font-size: 1.5rem;
+            }
+            
+            .scrapbook-card {
+                height: 340px;
+            }
+            
+            .scrapbook-img-hover {
+                height: 180px;
+            }
+
+            .fixed-action-btn {
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .btn-floating {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .btn-floating img.paw-icon {
+                width: 30px;
+                height: 30px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="profile-header">
-            <img src="{{ url_for('static', filename='images/default-profile.jpg') if not user.get('profile_image') else url_for('static', filename='uploads/' + user.profile_image) }}" alt="{{ user.username }}" class="profile-image">
-            <div class="profile-info">
-                <h1 class="profile-username">{{ user.username }}</h1>
-                <p class="profile-description">{{ user.get('description', 'No description added yet.') }}</p>
-                
-                {% if session.get("user_id") == user._id|string %}
-                <div class="profile-actions">
-                    <a href="{{ url_for('edit_profile') }}"><button>Edit Profile</button></a>
-                    <a href="{{ url_for('sell_stuff') }}"><button>Sell Stuff</button></a>
-
+        <div class="comic-page">
+            <!-- Profile Panel -->
+            <div class="comic-panel profile-panel">
+                <div class="profile-image-container">
+                    <img src="{{ url_for('static', filename='images/default-profile.jpg') if not user.get('profile_image') else url_for('static', filename='uploads/' + user.profile_image) }}" alt="{{ user.username }}" class="profile-image">
                 </div>
-                {% endif %}
+                <div class="profile-info">
+                    <div class="speech-bubble">
+                        <h1 class="profile-username">{{ user.username }}</h1>
+                    </div>
+                    
+                    {% if session.get("user_id") == user._id|string %}
+                    <div class="profile-actions">
+                        <a href="{{ url_for('edit_profile') }}" class="action-button">Edit Profile</a>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-
-        <div class="section-header">
-            <h2>Scrapbooks</h2>
-        </div>
-        
-        {% if scrapbooks or session.get("user_id") == user._id|string %}
-            <div class="scrapbook-grid">
-                {% if session.get("user_id") == user._id|string %}
-                <div class="create-scrapbook">
-                    <a href="{{ url_for('new_scrapbook') }}" class="card-link" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%;">
-                        <div class="create-icon">+</div>
-                        <h3 style="margin-top: 10px; margin-bottom: 5px; color: rgb(0, 0, 0); font-size: 1.3rem; font-weight: 600;">Create New Scrapbook</h3>
-                        <p style="font-size: 0.9rem; color: #424242; margin-top: 10px; text-align: center;">Design your scrapbook with images, text, and stickers</p>
-                    </a>
-                </div>
-                {% endif %}
-                
+            
+            <!-- Create Panel -->
+            {% if session.get("user_id") == user._id|string %}
+            <a href="{{ url_for('new_scrapbook') }}" class="comic-panel create-panel">
+                <div class="create-icon">+</div>
+                <h3 class="create-text">CREATE NEW SCRAPBOOK</h3>
+                <p class="create-description">Design your comic adventure!</p>
+            </a>
+            {% else %}
+            <div class="comic-panel create-panel">
+                <div class="create-icon">★</div>
+                <h3 class="create-text">{{ user.username }}'s PROFILE</h3>
+                <p class="create-description">Check out their awesome scrapbooks!</p>
+            </div>
+            {% endif %}
+            
+            
+            
+            <!-- Scrapbooks Container -->
+            <div class="scrapbooks-container">
                 {% for sb in scrapbooks %}
                     {% if sb.privacy == 'public' or session.get("user_id") == user._id|string %}
                     <article class="scrapbook-card">
-                        
-                        
-                        <div class="scrapbook-img"></div>
                         {% if sb.privacy == 'private' %}
-                        <div class="scrapbook-badge">Private</div>
+                        <div class="scrapbook-badge">PRIVATE</div>
                         {% endif %}
                         
                         <a href="{{ url_for('view_scrapbook', scrapbook_id=sb._id) }}" class="card-link">
                             <div class="scrapbook-img-hover" style="background-image: url('{{ sb.cover_image or url_for('static', filename='images/default_cover.jpg') }}');"></div>
+                            <div class="scrapbook-info">
+                                <span class="scrapbook-category">SCRAPBOOK • {{ sb.pages|length }} PAGES</span>
+                                <h3 class="scrapbook-title">{{ sb.title }}</h3>
+                                <p class="scrapbook-description">
+                                    {% if sb.get('description') %}
+                                        {{ sb.description|truncate(100) }}
+                                    {% else %}
+                                        A creative collection of memories and ideas.
+                                    {% endif %}
+                                </p>
+                                <span class="scrapbook-by">CREATED ON <span class="scrapbook-time">{{ sb.get('created_at', '')|format_date }}</span></span>
+                            </div>
                         </a>
                         
-                        <div class="scrapbook-info">
-                            <span class="scrapbook-category">Scrapbook • {{ sb.pages|length }} pages</span>
-                            <h3 class="scrapbook-title">{{ sb.title }}</h3>
-                            <p class="scrapbook-description">
-                                {% if sb.get('description') %}
-                                    {{ sb.description|truncate(100) }}
-                                {% else %}
-                                    A creative collection of memories and ideas.
-                                {% endif %}
-                            </p>
-                            <span class="scrapbook-by">Created on <span class="scrapbook-time">{{ sb.get('created_at', '')|format_date }}</span></span>
-                            
-                            {% if session.get("user_id") == user._id|string %}
-                            
-                            {% endif %}
+                        {% if session.get("user_id") == user._id|string %}
+                        <div class="scrapbook-actions">
+                            <button class="delete-scrapbook-btn" 
+                                    data-scrapbook-id="{{ sb._id }}" 
+                                    data-scrapbook-title="{{ sb.title }}">
+                                DELETE
+                            </button>
                         </div>
+                        {% endif %}
                     </article>
                     {% endif %}
                 {% endfor %}
-            </div>
-        {% elif user.get("scrapbooks") %}
-            <p class="no-scrapbooks">This user has no public scrapbooks.</p>
-        {% else %}
-            <p class="no-scrapbooks">No scrapbooks created yet.</p>
-        {% endif %}
-    </div>
-
-    <!-- Delete confirmation modal -->
-    <div class="modal-overlay" id="delete-modal">
-        <div class="modal-content">
-            <h3 class="modal-title">Delete Scrapbook</h3>
-            <p>Are you sure you want to delete "<span id="scrapbook-title-confirm"></span>"? This action cannot be undone.</p>
-            <div class="modal-buttons">
-                <button class="btn-cancel" id="cancel-delete">Cancel</button>
-                <button class="btn-delete" id="confirm-delete">Delete</button>
+                
+                {% if scrapbooks|length == 0 %}
+                <div class="empty-state">
+                    <h3>NO SCRAPBOOKS YET!</h3>
+                    <p>Start creating your first comic adventure</p>
+                    {% if session.get("user_id") == user._id|string %}
+                    <a href="{{ url_for('new_scrapbook') }}" class="action-button">CREATE ONE NOW</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <a class="back-button" href="{{ url_for('home') }}">← Back to Home</a>
+    <!-- Floating Action Button -->
+    <div class="fixed-action-btn">
+        <a class="btn-floating">
+            <img src="{{ url_for('static', filename='images/paw.png') }}" alt="Menu" class="paw-icon">
+        </a>
+        <ul>
+            <li>
+                <a href="{{ url_for('home') }}" class="menu-option">
+                    <img src="{{ url_for('static', filename='images/home.png') }}" class="icons"> HOME
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('marketplace') }}" class="menu-option">
+                    <img src="{{ url_for('static', filename='images/marketplace.png') }}" class="icons"> MARKET
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('cart') }}" class="menu-option">
+                    <img src="{{ url_for('static', filename='images/cart.png') }}" class="icons"> CART
+                </a>
+            </li>
+           
+        </ul>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">DELETE SCRAPBOOK</h3>
+            <p>Are you sure you want to delete "<span id="scrapbook-title-confirm"></span>"? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" id="cancel-delete">CANCEL</button>
+                <button class="btn-delete" id="confirm-delete">DELETE</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Delete modal functionality
             const deleteModal = document.getElementById('delete-modal');
             const cancelDelete = document.getElementById('cancel-delete');
             const confirmDelete = document.getElementById('confirm-delete');
             const scrapbookTitleConfirm = document.getElementById('scrapbook-title-confirm');
             let scrapbookToDelete = null;
-            
-            // Delete scrapbook functionality with modal confirmation
-            const deleteButtons = document.querySelectorAll('.delete-scrapbook');
+
+            // Function to open the delete modal
+            function openDeleteModal(scrapbookId, scrapbookTitle) {
+                scrapbookToDelete = scrapbookId;
+                scrapbookTitleConfirm.textContent = scrapbookTitle;
+                deleteModal.classList.add('active');
+            }
+
+            // Function to close the delete modal
+            function closeDeleteModal() {
+                deleteModal.classList.remove('active');
+                scrapbookToDelete = null;
+            }
+
+            // Add event listeners to delete buttons
+            const deleteButtons = document.querySelectorAll('.delete-scrapbook-btn');
             deleteButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const scrapbookId = this.dataset.id;
-                    const scrapbookTitle = this.dataset.title;
-                    scrapbookToDelete = scrapbookId;
-                    
-                    // Update modal with scrapbook title
-                    scrapbookTitleConfirm.textContent = scrapbookTitle;
-                    
-                    // Show modal
-                    deleteModal.classList.add('active');
+                    const scrapbookId = this.getAttribute('data-scrapbook-id');
+                    const scrapbookTitle = this.getAttribute('data-scrapbook-title');
+                    openDeleteModal(scrapbookId, scrapbookTitle);
                 });
             });
-            
-            // Cancel delete
-            cancelDelete.addEventListener('click', function() {
-                deleteModal.classList.remove('active');
-                scrapbookToDelete = null;
+
+            // Cancel delete button event
+            cancelDelete.addEventListener('click', closeDeleteModal);
+
+            // Click outside modal to close
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    closeDeleteModal();
+                }
             });
-            
-            // Confirm delete
+
+            // Confirm delete button event
             confirmDelete.addEventListener('click', function() {
                 if (scrapbookToDelete) {
-                    fetch(`/api/scrapbook/${scrapbookToDelete}/delete`, {
-                        method: 'DELETE',
+                    // Send delete request to server
+                    fetch(`/scrapbook/${scrapbookToDelete}/delete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Remove the scrapbook card from the DOM
-                            const cardToRemove = document.querySelector(`.delete-scrapbook[data-id="${scrapbookToDelete}"]`).closest('.scrapbook-card');
-                            cardToRemove.remove();
-                            
-                            // Hide modal
-                            deleteModal.classList.remove('active');
-                            scrapbookToDelete = null;
+                    .then(response => {
+                        if (response.ok) {
+                            // Redirect to profile page or reload current page
+                            window.location.reload();
                         } else {
-                            alert('Error deleting scrapbook: ' + data.error);
+                            console.error('Failed to delete scrapbook');
+                            alert('Failed to delete scrapbook. Please try again.');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('An error occurred while deleting the scrapbook.');
+                        alert('An error occurred. Please try again.');
+                    })
+                    .finally(() => {
+                        closeDeleteModal();
                     });
                 }
             });
+
+            // FAB Button functionality
+            const fab = document.querySelector('.fixed-action-btn');
+            const fabButton = fab.querySelector('.btn-floating');
             
-            // Close modal when clicking outside
-            deleteModal.addEventListener('click', function(e) {
-                if (e.target === deleteModal) {
-                    deleteModal.classList.remove('active');
-                    scrapbookToDelete = null;
+            fabButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                fab.classList.toggle('active');
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!fab.contains(e.target)) {
+                    fab.classList.remove('active');
+                }
+            });
+
+            // Add keyboard event to close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && deleteModal.classList.contains('active')) {
+                    closeDeleteModal();
                 }
             });
         });

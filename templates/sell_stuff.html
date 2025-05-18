@@ -2,197 +2,431 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sell Products</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Comic Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@300;400;700&family=Bubblegum+Sans&family=Permanent+Marker&display=swap" rel="stylesheet">
     <style>
-        body, html {
-            font-family: 'Roboto Slab', serif;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgb(57, 130, 133);
-            color: black;
-        }
-
-        .container {
-            max-width: 1700px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        h2, h3 {
-            font-family: 'Roboto Slab', serif;
-            margin-top: 0;
-        }
-
-        button {
-            padding: 8px 20px;
-            background-color: rgb(20,42,43);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-family: 'Raleway', sans-serif;
-        }
-
-        button:hover {
-            background-color: rgb(39, 78, 80);
-        }
-
-        .add-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            font-weight: 600;
+        :root {
+            --primary-red: #FF3D3D;
+            --primary-blue: #3D7EFF;
+            --primary-yellow: #FFEB3B;
+            --primary-green: #4CAF50;
+            --dark-color: #1A1A1A;
+            --light-color: #F5F5F5;
+            --comic-border: 3px solid var(--dark-color);
+            --comic-shadow: 6px 6px 0 var(--dark-color);
+            --comic-highlight: 0 0 10px rgba(255, 235, 59, 0.7);
         }
         
-        .add-button::before {
-            content: "+";
-            font-size: 1.2rem;
-            font-weight: bold;
+        body {
+            font-family: 'Comic Neue', cursive;
+            background-color: #FFEB3B;
+            background-image: 
+                radial-gradient(circle, var(--primary-red) 2px, transparent 3px),
+                radial-gradient(circle, var(--primary-blue) 2px, transparent 3px);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0 15px;
-            border: 1px solid #333;
-            border-radius: 10px;
-            background-color: blanchedalmond;
-            color: black;
-            font-family: 'Roboto Slab', serif;
-            transition: border-color 0.3s ease;
-            box-sizing: border-box;
+        .comic-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            position: relative;
         }
 
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #444;
-        }
-
-        .form-section, .shop-section, .product-section {
-            background-color: blanchedalmond;
+        /* Comic Book Header */
+        .comic-header {
+            background-color: var(--primary-red);
+            color: white;
             padding: 30px;
-            border-radius: 12px;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
-            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
 
-        .form-section:hover, .shop-section:hover, .product-section:hover {
-            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
-            transform: scale(1.02, 1.02);
+        .comic-header h1 {
+            font-family: 'Bangers', cursive;
+            font-size: 4rem;
+            margin: 0;
+            letter-spacing: 3px;
+            text-shadow: 4px 4px 0 var(--dark-color);
+            -webkit-text-stroke: 2px var(--dark-color);
+            transform: rotate(-2deg);
+            color: var(--primary-yellow);
         }
 
+        /* Comic Panels */
+        .comic-panel {
+            background-color: white;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comic-panel.blue {
+            background-color: #BBDEFB;
+        }
+
+        .comic-panel.green {
+            background-color: #C8E6C9;
+        }
+
+        /* Shop Display */
+        .shop-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .shop-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .shop-info {
+            text-align: center;
+            width: 100%;
+        }
+
+        .shop-name {
+            font-family: 'Bangers', cursive;
+            font-size: 3rem;
+            color: var(--primary-blue);
+            text-shadow: 3px 3px 0 var(--dark-color);
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+            -webkit-text-stroke: 1px var(--dark-color);
+        }
+
+        .shop-description {
+            font-size: 1.2rem;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: var(--comic-border);
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Product Grid */
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 25px;
             margin-top: 30px;
         }
 
         .product-card {
-            position: relative;
-            border-radius: 12px;
+            background-color: white;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
-            transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
-            background-color: #222;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 350px;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .product-card:hover {
-            box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.2);
-            transform: scale(1.05, 1.05);
+            transform: translateY(-5px) rotate(-1deg);
+            box-shadow: 8px 8px 0 var(--dark-color);
         }
 
         .product-img-container {
-            height: 200px;
-            width: 100%;
+            height: 300px;
             overflow: hidden;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            position: relative;
-            background-color: #1a1a1a;
+            border-bottom: var(--comic-border);
         }
 
         .product-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: 0.2s all ease-out;
+            transition: transform 0.3s ease;
         }
 
         .product-card:hover .product-img {
-            opacity: 0.7;
             transform: scale(1.1);
         }
 
         .product-info {
-            padding: 16px 24px 24px 24px;
-            flex: 1;
-            z-index: 2;
-            background-color: #222;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-        }
-
-        .product-category {
-            font-family: 'Raleway', sans-serif;
-            text-transform: uppercase;
-            font-size: 13px;
-            letter-spacing: 2px;
-            font-weight: 500;
-            color: #868686;
+            padding: 15px;
+            position: relative;
         }
 
         .product-title {
-            margin-top: 5px;
-            margin-bottom: 10px;
-            font-family: 'Roboto Slab', serif;
-            font-size: 1.3rem;
-            color: white;
-            font-weight: 600;
+            font-family: 'Bangers', cursive;
+            font-size: 1.5rem;
+            margin: -48px 0 10px 0;
+            color: var(--dark-color);
+            letter-spacing: 1px;
         }
 
         .product-description {
-            color: #aaa;
             font-size: 0.9rem;
             margin-bottom: 15px;
-            line-height: 1.4;
+            color: var(--dark-color);
         }
 
         .product-price {
-            font-family: 'Raleway', sans-serif;
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-red);
+            background-color: var(--primary-yellow);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid var(--dark-color);
+        }
+
+        /* Buttons */
+        .comic-button {
+            font-family: 'Bubblegum Sans', cursive;
+            background-color: var(--primary-blue);
+            color: white;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            padding: 12px 25px;
             font-size: 1.1rem;
-            font-weight: 700;
-            color: #d6dbe4;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin: 10px;
         }
 
-        img.preview {
-            max-width: 150px;
+        .comic-button:hover {
+            background-color: var(--primary-red);
+            transform: translateY(-3px) rotate(-2deg);
+        }
+
+        .comic-button.yellow {
+            background-color: var(--primary-yellow);
+            color: var(--dark-color);
+        }
+
+        .comic-button.yellow:hover {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .comic-button.red {
+            background-color: var(--primary-red);
+            color: white;
+        }
+
+        /* Edit Icons */
+        .edit-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary-yellow);
+            color: var(--dark-color);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid var(--dark-color);
+            box-shadow: 2px 2px 0 var(--dark-color);
+            z-index: 2;
+        }
+
+        .edit-icon:hover {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        /* Forms */
+        .edit-form {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border: var(--comic-border);
+            border-radius: 10px;
             margin-top: 10px;
-            display: block;
-            border-radius: 8px;
         }
 
-        /* Modal styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-family: 'Bubblegum Sans', cursive;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1rem;
+            color: var(--dark-color);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: var(--comic-border);
+            border-radius: 5px;
+            font-family: 'Comic Neue', cursive;
+            font-size: 1rem;
+            box-shadow: 3px 3px 0 var(--dark-color);
+        }
+
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--primary-yellow);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* File Input */
+        .file-input-container {
+            margin-bottom: 15px;
+        }
+
+        .file-input-label {
+            display: block;
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Bubblegum Sans', cursive;
+        }
+
+        .file-input-label:hover {
+            background-color: var(--primary-red);
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: var(--dark-color);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            border-radius: 10px;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            transform: rotate(-10deg);
+        }
+
+        .empty-state-text {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--dark-color);
+        }
+
+        /* Flash Messages */
+        .flash-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            font-family: 'Bubblegum Sans', cursive;
+            font-weight: bold;
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .flash-success {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        .flash-error {
+            background-color: var(--primary-red);
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-block;
+            margin-top: 30px;
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: white;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--primary-blue);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgb(20,42,43);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -208,454 +442,353 @@
         }
 
         .modal-content {
-            background: rgb(39, 78, 80);
+            background-color: white;
+            border: var(--comic-border);
+            box-shadow: var(--comic-shadow);
             border-radius: 15px;
             padding: 30px;
             width: 90%;
-            max-width: 500px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
-            max-height: 85vh;
+            max-width: 600px;
+            max-height: 90vh;
             overflow-y: auto;
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
+            position: relative;
         }
 
         .modal-title {
-            margin-top: 0;
-            color: black;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .modal-buttons button {
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            font-family: 'Raleway', sans-serif;
-        }
-
-        .btn-cancel {
-            background: rgb(20,42,43);
-            color: white;
-        }
-
-        .btn-submit {
-            background: rgb(20,42,43);
-            color: white;
-        }
-
-        .btn-submit:hover {
-            background: rgb(62, 124, 128);
-        }
-        .btn-cancel:hover {
-            background: rgb(62, 124, 128);
-        }
-        
-        .back-button {
-            display: inline-block;
-            margin-top: 30px;
-            color: black;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .back-button:hover {
-            color: white;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .section-header h2 {
-            margin: 0;
-        }
-
-        /* Empty state styling */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: #444;
-        }
-
-        .empty-state-text {
-            font-size: 1.2rem;
-            color: #888;
-            margin-bottom: 30px;
-        }
-
-        /* Shop header with image */
-        .shop-header {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 20px;
-        }
-
-        .shop-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #333;
-        }
-
-        .shop-info {
-            flex: 1;
-        }
-
-        .shop-name {
+            font-family: 'Bangers', cursive;
             font-size: 2rem;
-            margin: 0 0 10px 0;
-            font-weight: 700;
+            color: var(--primary-blue);
+            text-shadow: 2px 2px 0 var(--dark-color);
+            margin-top: 0;
+            text-align: center;
         }
 
-        .shop-description {
-            color: #ccc;
-            margin-bottom: 15px;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .label {
-            font-family: 'Raleway', sans-serif;
-            display: block;
-            margin-bottom: 5px;
-            color: #ccc;
-            font-size: 0.9rem;
-        }
-
-        /* Form group spacing */
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        /* File input styling */
-        .file-input-container {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .file-input-label {
-            display: block;
-            background-color: rgb(20,42,43);
-            color: white;
-            padding: 10px 15px;
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            display: none;
+            margin-top: 10px;
+            border: var(--comic-border);
             border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
-            transition: background-color 0.3s;
-        }
-
-        .file-input-label:hover {
-            background-color: rgb(62, 124, 128);
-        }
-
-        .file-input {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-name {
-            margin-top: 8px;
-            font-size: 0.8rem;
-            color: #888;
-        }
-
-        /* Add product button styling */
-        .add-product-container {
-            text-align: center;
-            margin-bottom: 30px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="section-header">
-            <h2>Sell Products</h2>
+    <div class="comic-container">
+        <div class="comic-header">
+            <h1>YOUR COMIC SHOP</h1>
+            <p>Manage your comic book store and products!</p>
         </div>
 
-        {% if not shop %}
-            <div class="form-section" style="text-align:center;">
-                <h3>Start Selling</h3>
-                <p>Create your shop to start selling products on our platform</p>
-                <button class="add-button" id="create-shop-btn">Create Shop</button>
-            </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-            <!-- Shop Modal -->
-            <div class="modal-overlay" id="shop-modal">
-                <div class="modal-content">
-                    <h3 class="modal-title">Create Your Shop</h3>
-                    <form action="/create_shop" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label class="label" for="shop-name">Shop Name</label>
-                            <input id="shop-name" name="name" placeholder="Enter your shop name" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="label" for="shop-description">Description</label>
-                            <textarea id="shop-description" name="description" placeholder="Tell customers about your shop" rows="4"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="label">Shop Image</label>
-                            <div class="file-input-container">
-                                <label class="file-input-label" for="shopImageFile">
-                                    Choose Image
-                                </label>
-                                <input type="file" id="shopImageFile" class="file-input" accept="image/*">
-                                <div class="file-name" id="shop-file-name">No file chosen</div>
-                                <p style="font-size: 0.8rem; color: #888;">Maximum image size: 1MB</p>
-                            </div>
-                            <input type="hidden" name="image_url" id="shopImageUrl">
-                            <img id="shopImagePreview" class="preview" style="display: none;">
-                        </div>
-                        
-                        <div class="modal-buttons">
-                            <button type="button" class="btn-cancel" id="cancel-shop-create">Cancel</button>
-                            <button type="submit" class="btn-submit">Create Shop</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        {% else %}
-            <div class="shop-section">
-                <div class="shop-header">
-                    {% if shop.image_url %}
-                        <img src="{{ shop.image_url }}" class="shop-image" alt="{{ shop.name }}">
+        {% if session.get('profile_type') == 'seller' %}
+            <!-- Shop Display -->
+            <div class="comic-panel blue">
+                <div class="shop-display">
+                    <div class="edit-icon" id="edit-profile-btn">✏️</div>
+                    
+                    {% if user.profile_image %}
+                        <img src="{{ url_for('static', filename='uploads/' + user.profile_image) }}" class="shop-image" alt="{{ user.shop_name }}">
                     {% else %}
-                        <img src="{{ url_for('static', filename='images/default-shop.jpg') }}" class="shop-image" alt="{{ shop.name }}">
+                        <img src="{{ url_for('static', filename='images/default-shop.jpg') }}" class="shop-image" alt="Default Shop Image">
                     {% endif %}
+                    
                     <div class="shop-info">
-                        <h2 class="shop-name">{{ shop.name }}</h2>
-                        <p class="shop-description">{{ shop.description or 'No description available.' }}</p>
+                        <h2 class="shop-name">{{ user.shop_name or 'Your Shop' }}</h2>
+                        <p class="shop-description">{{ user.description or 'No description available' }}</p>
+                    </div>
+                    
+                    <!-- Profile Edit Form -->
+                    <div class="edit-form" id="profile-edit-form">
+                        <form action="/update_seller_profile" method="POST" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="form-label" for="shop-name">Shop Name</label>
+                                <input type="text" id="shop-name" name="shop_name" class="form-input" 
+                                       value="{{ user.shop_name or '' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="shop-description">Description</label>
+                                <textarea id="shop-description" name="description" class="form-input" 
+                                          rows="4">{{ user.description or '' }}</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Shop Image</label>
+                                <div class="file-input-container">
+                                    <label class="file-input-label" for="profile-image">
+                                        CHANGE SHOP IMAGE
+                                    </label>
+                                    <input type="file" id="profile-image" class="file-input" name="profile_image" accept="image/*">
+                                    <div class="file-name" id="profile-file-name">Keep current image</div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button type="button" class="comic-button" id="cancel-profile-edit">CANCEL</button>
+                                <button type="submit" class="comic-button yellow">UPDATE PROFILE</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <div class="add-product-container">
-                <button class="add-button" id="add-product-btn">Add New Product</button>
+            <!-- Add Product Button -->
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="comic-button yellow" id="add-product-btn">ADD NEW PRODUCT</button>
             </div>
 
             <!-- Add Product Modal -->
             <div class="modal-overlay" id="product-modal">
                 <div class="modal-content">
-                    <h3 class="modal-title">Add New Product</h3>
-                    <form action="/add_product" method="POST" enctype="multipart/form-data">
+                    <h3 class="modal-title">ADD NEW PRODUCT</h3>
+                    <form action="{{ url_for('add_product') }}" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label class="label" for="product-name">Product Name</label>
-                            <input id="product-name" name="name" placeholder="Enter product name" required>
+                            <label class="form-label" for="product-name">Product Name</label>
+                            <input type="text" id="product-name" name="name" class="form-input" placeholder="Amazing Comic #1" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="label" for="product-description">Description</label>
-                            <textarea id="product-description" name="description" placeholder="Describe your product" rows="4"></textarea>
+                            <label class="form-label" for="product-description">Description</label>
+                            <textarea id="product-description" name="description" class="form-input" rows="4" placeholder="Describe your product..." required></textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label class="label" for="product-price">Price (₹)</label>
-                            <input id="product-price" name="price" type="number" step="0.01" placeholder="Enter price" required>
+                            <label class="form-label" for="product-price">Price (₹)</label>
+                            <input type="number" id="product-price" name="price" class="form-input" step="0.01" min="0" placeholder="99.99" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="label">Product Image</label>
+                            <label class="form-label">Product Image</label>
                             <div class="file-input-container">
-                                <label class="file-input-label" for="productImageFile">
-                                    Choose Image
+                                <label class="file-input-label" for="product-image">
+                                    CHOOSE PRODUCT IMAGE
                                 </label>
-                                <input type="file" id="productImageFile" class="file-input" accept="image/*">
+                                <input type="file" id="product-image" class="file-input" name="image" accept="image/*" required>
                                 <div class="file-name" id="product-file-name">No file chosen</div>
-                                <p style="font-size: 0.8rem; color: #888;">Maximum image size: 1MB</p>
                             </div>
-                            <input type="hidden" name="image_url" id="productImageUrl">
-                            <img id="productImagePreview" class="preview" style="display: none;">
+                            <img id="product-image-preview" class="image-preview">
                         </div>
                         
-                        <div class="modal-buttons">
-                            <button type="button" class="btn-cancel" id="cancel-product-add">Cancel</button>
-                            <button type="submit" class="btn-submit">Add Product</button>
+                        <div class="action-buttons">
+                            <button type="button" class="comic-button" id="cancel-product">CANCEL</button>
+                            <button type="submit" class="comic-button yellow">ADD PRODUCT</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div class="section-header">
-                <h2>Your Products</h2>
+            <!-- Products Section -->
+            <div class="comic-panel green">
+                <h2 style="text-align: center; margin-top: 0;">YOUR PRODUCTS</h2>
+                
+                {% if products and products|length > 0 %}
+                    <div class="product-grid">
+                        {% for product in products %}
+                            <div class="product-card">
+                                <div class="product-img-container">
+                                    {% if product.image %}
+                                        <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="product-img" alt="{{ product.name }}">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/default-product.jpg') }}" class="product-img" alt="{{ product.name }}">
+                                    {% endif %}
+                                </div>
+                                <div class="product-info">
+                                    <div class="edit-icon product-edit-btn">✏️</div>
+                                    <h3 class="product-title">{{ product.name }}</h3>
+                                    <p class="product-description">{{ product.description or 'No description available' }}</p>
+                                    <div class="product-price">₹{{ "%.2f"|format(product.price) }}</div>
+                                    
+                                    <!-- Product Edit Form -->
+                                    <div class="edit-form">
+                                        <form action="/update_product" method="POST" enctype="multipart/form-data">
+                                            <input type="hidden" name="product_id" value="{{ product._id }}">
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Product Name</label>
+                                                <input type="text" name="name" class="form-input" value="{{ product.name }}" required>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Description</label>
+                                                <textarea name="description" class="form-input" rows="3" required>{{ product.description }}</textarea>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Price (₹)</label>
+                                                <input type="number" name="price" class="form-input" step="0.01" min="0" value="{{ product.price }}" required>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Product Image</label>
+                                                <div class="file-input-container">
+                                                    <label class="file-input-label" for="product-image-{{ product._id }}">
+                                                        CHANGE IMAGE
+                                                    </label>
+                                                    <input type="file" id="product-image-{{ product._id }}" class="file-input" name="image" accept="image/*">
+                                                    <div class="file-name">Keep current image</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="action-buttons">
+                                                <button type="button" class="comic-button cancel-product-edit">CANCEL</button>
+                                                <button type="submit" class="comic-button yellow">UPDATE</button>
+                                                <button type="button" class="comic-button red delete-product-btn" data-product-id="{{ product._id }}">DELETE</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <p class="empty-state-text">You haven't added any products yet!</p>
+                        <button class="comic-button yellow" id="add-product-empty-btn">ADD YOUR FIRST PRODUCT</button>
+                    </div>
+                {% endif %}
             </div>
-            
-            {% if products and products|length > 0 %}
-                <div class="product-grid">
-                    {% for product in products %}
-                        <div class="product-card">
-                            <div class="product-img-container">
-                                {% if product.image_url %}
-                                    <img src="{{ product.image_url }}" class="product-img" alt="{{ product.name }}">
-                                {% else %}
-                                    <img src="{{ url_for('static', filename='images/default-product.jpg') }}" class="product-img" alt="{{ product.name }}">
-                                {% endif %}
-                            </div>
-                            <div class="product-info">
-                                <span class="product-category">Product</span>
-                                <h3 class="product-title">{{ product.name }}</h3>
-                                <p class="product-description">
-                                    {{ product.description or 'No description available.' }}
-                                </p>
-                                <div class="product-price">₹{{ product.price }}</div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📦</div>
-                    <p class="empty-state-text">You haven't added any products yet.</p>
-                    <button class="add-button" id="add-product-empty-btn">Add Your First Product</button>
-                </div>
-            {% endif %}
+        {% else %}
+            <div class="comic-panel red" style="text-align: center;">
+                <h2>Seller Account Required</h2>
+                <p>You need a seller account to access the comic shop management.</p>
+                <p>Please update your profile type to "seller" in your profile settings.</p>
+                <a href="{{ url_for('profile', username=session.get('username', '')) }}" class="comic-button yellow">GO TO PROFILE</a>
+            </div>
         {% endif %}
         
-        <a href="{{ url_for('profile', username=session.get('username', '')) }}" class="back-button">← Back to Profile</a>
+        <a href="{{ url_for('profile', username=session.get('username', '')) }}" class="back-button">← BACK TO PROFILE</a>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Create shop modal functionality
-            const shopModal = document.getElementById('shop-modal');
-            const createShopBtn = document.getElementById('create-shop-btn');
-            const cancelShopCreate = document.getElementById('cancel-shop-create');
-            
-            // Add product modal functionality
+            // Modal handling
             const productModal = document.getElementById('product-modal');
+            
+            // Buttons
             const addProductBtn = document.getElementById('add-product-btn');
             const addProductEmptyBtn = document.getElementById('add-product-empty-btn');
-            const cancelProductAdd = document.getElementById('cancel-product-add');
+            const cancelProductBtn = document.getElementById('cancel-product');
+
+            // Show modals
+            if (addProductBtn) addProductBtn.addEventListener('click', () => productModal.classList.add('active'));
+            if (addProductEmptyBtn) addProductEmptyBtn.addEventListener('click', () => productModal.classList.add('active'));
+
+            // Hide modals
+            if (cancelProductBtn) cancelProductBtn.addEventListener('click', () => productModal.classList.remove('active'));
+
+            // File input handling for product image
+            const productImageInput = document.getElementById('product-image');
+            const productFileName = document.getElementById('product-file-name');
+            const productPreview = document.getElementById('product-image-preview');
             
-            // Shop modal triggers
-            if (createShopBtn) {
-                createShopBtn.addEventListener('click', function() {
-                    shopModal.classList.add('active');
+            if (productImageInput && productFileName && productPreview) {
+                productImageInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        productFileName.textContent = this.files[0].name;
+                        
+                        // Check file size (max 2MB)
+                        if (this.files[0].size > 2 * 1024 * 1024) {
+                            alert('File is too large! Maximum size is 2MB.');
+                            this.value = '';
+                            productFileName.textContent = 'No file chosen';
+                            productPreview.style.display = 'none';
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            productPreview.src = e.target.result;
+                            productPreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    } else {
+                        productFileName.textContent = 'No file chosen';
+                        productPreview.style.display = 'none';
+                    }
                 });
             }
-            
-            if (cancelShopCreate) {
-                cancelShopCreate.addEventListener('click', function() {
-                    shopModal.classList.remove('active');
-                });
-            }
-            
-            // Product modal triggers
-            if (addProductBtn) {
-                addProductBtn.addEventListener('click', function() {
-                    productModal.classList.add('active');
-                });
-            }
-            
-            if (addProductEmptyBtn) {
-                addProductEmptyBtn.addEventListener('click', function() {
-                    productModal.classList.add('active');
-                });
-            }
-            
-            if (cancelProductAdd) {
-                cancelProductAdd.addEventListener('click', function() {
-                    productModal.classList.remove('active');
-                });
-            }
-            
+
             // Close modals when clicking outside
-            const modals = document.querySelectorAll('.modal-overlay');
-            modals.forEach(modal => {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        modal.classList.remove('active');
+            productModal.addEventListener('click', (e) => {
+                if (e.target === productModal) {
+                    productModal.classList.remove('active');
+                }
+            });
+
+            // Profile edit toggle
+            document.getElementById('edit-profile-btn').addEventListener('click', function() {
+                document.getElementById('profile-edit-form').style.display = 'block';
+            });
+            
+            document.getElementById('cancel-profile-edit').addEventListener('click', function() {
+                document.getElementById('profile-edit-form').style.display = 'none';
+            });
+
+            // Product edit toggles
+            document.querySelectorAll('.product-edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const form = this.closest('.product-info').querySelector('.edit-form');
+                    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+            
+            document.querySelectorAll('.cancel-product-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.edit-form').style.display = 'none';
+                });
+            });
+
+            // Delete product buttons
+            document.querySelectorAll('.delete-product-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to delete this product?')) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/delete_product';
+                        
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'product_id';
+                        input.value = this.dataset.productId;
+                        
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                 });
             });
 
-            // File input handling for display filename
-            const shopFileInput = document.getElementById('shopImageFile');
-            const shopFileName = document.getElementById('shop-file-name');
-            const productFileInput = document.getElementById('productImageFile');
-            const productFileName = document.getElementById('product-file-name');
+            // Profile image file input
+            const profileImageInput = document.getElementById('profile-image');
+            const profileFileName = document.getElementById('profile-file-name');
             
-            if (shopFileInput && shopFileName) {
-                shopFileInput.addEventListener('change', function() {
-                    if (this.files.length > 0) {
-                        shopFileName.textContent = this.files[0].name;
+            if (profileImageInput && profileFileName) {
+                profileImageInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        profileFileName.textContent = this.files[0].name;
                     } else {
-                        shopFileName.textContent = 'No file chosen';
-                    }
-                });
-            }
-            
-            if (productFileInput && productFileName) {
-                productFileInput.addEventListener('change', function() {
-                    if (this.files.length > 0) {
-                        productFileName.textContent = this.files[0].name;
-                    } else {
-                        productFileName.textContent = 'No file chosen';
+                        profileFileName.textContent = 'Keep current image';
                     }
                 });
             }
 
-            // Image preview functionality with size validation
-            function previewImage(fileInputId, previewId, hiddenInputId) {
-                const fileInput = document.getElementById(fileInputId);
-                const preview = document.getElementById(previewId);
-                const hiddenInput = document.getElementById(hiddenInputId);
-                const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB limit
-
-                if (fileInput) {
-                    fileInput.addEventListener('change', function () {
-                        const file = this.files[0];
-                        if (file) {
-                            // Check file size
-                            if (file.size > MAX_FILE_SIZE) {
-                                alert('File is too large! Please select an image smaller than 1MB.');
-                                this.value = ''; // Clear the input
-                                if (fileInputId === 'shopImageFile') {
-                                    shopFileName.textContent = 'No file chosen';
-                                } else if (fileInputId === 'productImageFile') {
-                                    productFileName.textContent = 'No file chosen';
-                                }
-                                return;
-                            }
-                            
-                            const reader = new FileReader();
-                            reader.onload = function (e) {
-                                preview.src = e.target.result;
-                                preview.style.display = 'block';
-                                hiddenInput.value = e.target.result;
-                            }
-                            reader.readAsDataURL(file);
-                        }
-                    });
-                }
-            }
-
-            previewImage('shopImageFile', 'shopImagePreview', 'shopImageUrl');
-            previewImage('productImageFile', 'productImagePreview', 'productImageUrl');
+            // Flash message auto-hide
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.remove(), 300);
+                }, 3000);
+            });
         });
     </script>
 </body>

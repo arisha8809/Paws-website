@@ -3,96 +3,404 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paws - Authentication</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;500;700&display=swap" rel="stylesheet">
+  <title>PAWS - COMIC LOGIN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #FFD700;
+      --red: #FF0000;
+      --blue: #0066CC;
+      --black: #000000;
+      --white: #FFFFFF;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Neue', cursive;
+      background-color: var(--white);
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 0, 0.1) 0%, transparent 20%);
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* LEFT SIDE - COMIC PANEL STYLE */
+    .left-side {
+      flex: 1;
+      background-color: var(--blue);
+      border-right: 8px solid var(--black);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 821px;
+    }
+
+    .dog-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+      filter: contrast(120%) saturate(150%);
+    }
+
+    .comic-panel {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--yellow);
+      border: 4px solid var(--black);
+      padding: 15px;
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      transform: rotate(-5deg);
+      box-shadow: 8px 8px 0 var(--black);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* RIGHT SIDE - COMIC FORM */
+    .right-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--white);
+      position: relative;
+    }
+
+    .form-content {
+      width: 80%;
+      max-width: 400px;
+      background-color: var(--white);
+      border: 6px solid var(--black);
+      box-shadow: 12px 12px 0 var(--black);
+      padding: 30px;
+      transform: scale(0.9);
+      opacity: 0;
+      animation: zoomIn 0.6s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .form-title {
+      font-family: 'Bangers', cursive;
+      color: var(--red);
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 30px;
+      letter-spacing: 2px;
+      text-shadow: 4px 4px 0 var(--yellow);
+      transform: rotate(-2deg);
+      animation: wobble 2s infinite;
+    }
+
+    .form-item {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-item input {
+      width: 100%;
+      padding: 15px;
+      border: 4px solid var(--black);
+      font-family: 'Comic Neue', cursive;
+      font-size: 1rem;
+      background-color: var(--white);
+      box-shadow: 6px 6px 0 var(--black);
+      transition: all 0.3s;
+    }
+
+    .form-item input:focus {
+      outline: none;
+      background-color: var(--yellow);
+      transform: translate(3px, 3px);
+      box-shadow: 3px 3px 0 var(--black);
+    }
+
+    .action-button {
+      width: 100%;
+      padding: 15px;
+      background-color: var(--red);
+      color: var(--white);
+      border: 4px solid var(--black);
+      font-family: 'Bangers', cursive;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 6px 6px 0 var(--black);
+      transition: all 0.3s;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .action-button:hover {
+      background-color: var(--blue);
+      transform: translate(3px, 3px);
+      box-shadow: 3px 3px 0 var(--black);
+    }
+
+    .toggle-link {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--black);
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: all 0.3s;
+    }
+
+    .toggle-link:hover {
+      color: var(--red);
+      transform: scale(1.05);
+    }
+
+    .option-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .option-button {
+      padding: 15px;
+      background-color: var(--yellow);
+      color: var(--black);
+      border: 4px solid var(--black);
+      font-family: 'Bangers', cursive;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 6px 6px 0 var(--black);
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .option-button:hover {
+      background-color: var(--red);
+      color: var(--white);
+      transform: translate(3px, 3px);
+      box-shadow: 3px 3px 0 var(--black);
+    }
+
+    .file-upload {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-upload-label {
+      display: block;
+      padding: 15px;
+      background-color: var(--yellow);
+      color: var(--black);
+      border: 4px solid var(--black);
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 6px 6px 0 var(--black);
+      transition: all 0.3s;
+    }
+
+    .file-upload-label:hover {
+      background-color: var(--blue);
+      color: var(--white);
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-name {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--black);
+      font-style: italic;
+    }
+
+    /* ANIMATIONS */
+    @keyframes zoomIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-10px) rotate(-7deg); }
+    }
+
+    @keyframes slideOutLeft {
+      0% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(-100%); opacity: 0; }
+    }
+
+    @keyframes slideOutRight {
+      0% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+
+    .slide-right {
+      animation: slideOutRight 0.5s forwards;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .slide-left {
+      animation: slideOutLeft 0.5s forwards;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .active {
+      animation: zoomIn 0.5s forwards;
+      position: relative;
+    }
+
+    /* COMIC STYLE EFFECTS */
+    .comic-dots {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(circle at center, var(--black) 1px, transparent 1px);
+      background-size: 10px 10px;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .left-side {
+        height: 200px;
+        border-right: none;
+        border-bottom: 8px solid var(--black);
+      }
+
+      .dog-video {
+        clip-path: none;
+      }
+
+      .form-content {
+        width: 90%;
+        margin: 20px auto;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="comic-dots"></div>
+  
   <div class="container">
     <div class="left-side">
       <video class="dog-video" autoplay muted loop playsinline>
         <source src="{{ url_for('static', filename='images/dogs-create.mp4') }}" type="video/mp4">
         Your browser does not support the video tag.
       </video>
+      <div class="comic-panel">"LET'S GET STARTED, CHAMP!"</div>
     </div>
 
     <div class="right-side">
       <div class="form-content">
-        <!-- Login Page - Default View -->
+        <!-- Login Page -->
         <div class="form-page active" id="login-page">
-          <h1 class="form-title">WELCOME BACK!</h1>
+          <h1 class="form-title">POW! LOGIN</h1>
           <form id="login-form" action="{{ url_for('login') }}" method="POST">
             <div class="form-item">
-              <input type="text" name="username" placeholder="Username" required>
+              <input type="text" name="username" placeholder="HERO NAME" required>
             </div>
             <div class="form-item">
-              <input type="password" name="password" placeholder="Password" required>
+              <input type="password" name="password" placeholder="SECRET CODE" required>
             </div>
-            <button type="submit" class="action-button">Login</button>
+            <button type="submit" class="action-button">BAM! LOGIN</button>
           </form>
-          <p class="toggle-link" id="to-profile-type">Don't have an account? Sign up!</p>
+          <p class="toggle-link" id="to-profile-type">WHOA! NEW HERE? SIGN UP!</p>
         </div>
 
-        <!-- Profile Type Selection Page -->
+        <!-- Profile Type Selection -->
         <div class="form-page slide-right" id="profile-type-page">
-          <h1 class="form-title">Create your profile</h1>
+          <h1 class="form-title">CHOOSE YOUR PATH!</h1>
           <div class="option-buttons">
-            <button class="option-button" id="personal-button">Personal use</button>
-            <button class="option-button" id="seller-button">Shop owner</button>
+            <button class="option-button" id="personal-button">
+              <span style="font-size: 1.5rem;">🦸</span> PET LOVER
+            </button>
+            <button class="option-button" id="seller-button">
+              <span style="font-size: 1.5rem;">🏪</span> SHOP OWNER
+            </button>
           </div>
-          <p class="toggle-link" id="to-login-from-type">Already have an account? Login</p>
+          <p class="toggle-link" id="to-login-from-type">ZAP! ALREADY A MEMBER? LOGIN</p>
         </div>
 
-        <!-- Personal Profile Creation Page -->
+        <!-- Personal Profile Creation -->
         <div class="form-page slide-right" id="personal-profile-page">
-          <h1 class="form-title">Create your profile</h1>
+          <h1 class="form-title">CREATE YOUR PROFILE!</h1>
           <form id="personal-form" action="{{ url_for('create_profile', profile_type='personal') }}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="profile_type" value="personal">
             <div class="form-item">
-              <input type="text" name="username" placeholder="Username" required>
+              <input type="text" name="username" placeholder="HERO NAME" required>
             </div>
             <div class="form-item">
-              <input type="email" name="email" placeholder="Email" required>
+              <input type="email" name="email" placeholder="SECRET CONTACT" required>
             </div>
             <div class="form-item">
               <div class="file-upload">
-                <label for="personal-image" class="file-upload-label">Upload image</label>
+                <label for="personal-image" class="file-upload-label">UPLOAD YOUR AVATAR</label>
                 <input type="file" id="personal-image" name="profile_image" accept="image/*">
                 <span class="file-name" id="personal-file-name"></span>
               </div>
             </div>
             <div class="form-item">
-              <input type="password" name="password" placeholder="Password" required>
+              <input type="password" name="password" placeholder="SECRET CODE" required>
             </div>
-            <button type="submit" class="action-button">Sign up</button>
+            <button type="submit" class="action-button">BOOM! SIGN UP</button>
           </form>
         </div>
 
-        <!-- Seller Profile Creation Page -->
+        <!-- Seller Profile Creation -->
         <div class="form-page slide-right" id="seller-profile-page">
-          <h1 class="form-title">Create your profile</h1>
+          <h1 class="form-title">SHOP OWNER PROFILE!</h1>
           <form id="seller-form" action="{{ url_for('create_profile', profile_type='seller') }}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="profile_type" value="seller">
             <div class="form-item">
-              <input type="text" name="username" placeholder="Username" required>
+              <input type="text" name="username" placeholder="HERO NAME" required>
             </div>
             <div class="form-item">
-              <input type="email" name="email" placeholder="Email" required>
+              <input type="email" name="email" placeholder="SECRET CONTACT" required>
             </div>
             <div class="form-item">
-              <input type="text" name="shop_name" placeholder="Shop name" required>
+              <input type="text" name="shop_name" placeholder="SECRET BASE NAME" required>
             </div>
             <div class="form-item">
               <div class="file-upload">
-                <label for="seller-image" class="file-upload-label">Upload image</label>
+                <label for="seller-image" class="file-upload-label">UPLOAD YOUR AVATAR</label>
                 <input type="file" id="seller-image" name="profile_image" accept="image/*">
                 <span class="file-name" id="seller-file-name"></span>
               </div>
             </div>
             <div class="form-item">
-              <input type="password" name="password" placeholder="Password" required>
+              <input type="password" name="password" placeholder="SECRET CODE" required>
             </div>
-            <button type="submit" class="action-button">Sign up</button>
+            <button type="submit" class="action-button">KABOOM! SIGN UP</button>
           </form>
         </div>
       </div>
@@ -100,91 +408,90 @@
   </div>
 
   <script>
-    // Update the script section in create.html for the video animation
-const video = document.querySelector('.dog-video');
-video.addEventListener('loadeddata', () => {
-  // Animate the video sliding down from top
-  video.style.animation = 'slideFromLeft 0.8s ease-out forwards';
-});
+    // Page navigation
+    const loginPage = document.getElementById('login-page');
+    const profileTypePage = document.getElementById('profile-type-page');
+    const personalProfilePage = document.getElementById('personal-profile-page');
+    const sellerProfilePage = document.getElementById('seller-profile-page');
 
-// Page navigation
-const loginPage = document.getElementById('login-page');
-const profileTypePage = document.getElementById('profile-type-page');
-const personalProfilePage = document.getElementById('personal-profile-page');
-const sellerProfilePage = document.getElementById('seller-profile-page');
+    // Toggle links
+    const toProfileTypeLink = document.getElementById('to-profile-type');
+    const toLoginFromTypeLink = document.getElementById('to-login-from-type');
 
-// Toggle links
-const toProfileTypeLink = document.getElementById('to-profile-type');
-const toLoginFromTypeLink = document.getElementById('to-login-from-type');
+    // Profile type buttons
+    const personalButton = document.getElementById('personal-button');
+    const sellerButton = document.getElementById('seller-button');
 
-// Profile type buttons
-const personalButton = document.getElementById('personal-button');
-const sellerButton = document.getElementById('seller-button');
+    // File upload elements
+    const personalImageInput = document.getElementById('personal-image');
+    const sellerImageInput = document.getElementById('seller-image');
+    const personalFileName = document.getElementById('personal-file-name');
+    const sellerFileName = document.getElementById('seller-file-name');
 
-// File upload elements
-const personalImageInput = document.getElementById('personal-image');
-const sellerImageInput = document.getElementById('seller-image');
-const personalFileName = document.getElementById('personal-file-name');
-const sellerFileName = document.getElementById('seller-file-name');
-
-// Navigation functions
-function showPage(pageToShow, direction = 'right') {
-  // Hide all pages first
-  const pages = document.querySelectorAll('.form-page');
-  pages.forEach(page => {
-    if (page === pageToShow) {
-      page.classList.remove('slide-left', 'slide-right');
-      page.classList.add('active');
-    } else if (page.classList.contains('active')) {
-      page.classList.remove('active');
-      page.classList.add(direction === 'right' ? 'slide-left' : 'slide-right');
-    } else {
-      page.classList.remove('active');
-      page.classList.add(direction === 'right' ? 'slide-right' : 'slide-left');
+    // Navigation functions
+    function showPage(pageToShow, direction = 'right') {
+      const pages = document.querySelectorAll('.form-page');
+      pages.forEach(page => {
+        if (page === pageToShow) {
+          page.classList.remove('slide-left', 'slide-right');
+          page.classList.add('active');
+        } else if (page.classList.contains('active')) {
+          page.classList.remove('active');
+          page.classList.add(direction === 'right' ? 'slide-left' : 'slide-right');
+        } else {
+          page.classList.remove('active');
+          page.classList.add(direction === 'right' ? 'slide-right' : 'slide-left');
+        }
+      });
     }
-  });
-}
 
-// Event listeners
-toProfileTypeLink.addEventListener('click', () => {
-  showPage(profileTypePage, 'right');
-});
+    // Event listeners
+    toProfileTypeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(profileTypePage, 'right');
+    });
 
-toLoginFromTypeLink.addEventListener('click', () => {
-  showPage(loginPage, 'left');
-});
+    toLoginFromTypeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(loginPage, 'left');
+    });
 
-personalButton.addEventListener('click', () => {
-  showPage(personalProfilePage, 'right');
-});
+    personalButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(personalProfilePage, 'right');
+    });
 
-sellerButton.addEventListener('click', () => {
-  showPage(sellerProfilePage, 'right');
-});
+    sellerButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(sellerProfilePage, 'right');
+    });
 
-// File upload handling
-personalImageInput.addEventListener('change', () => {
-  if (personalImageInput.files.length > 0) {
-    personalFileName.textContent = personalImageInput.files[0].name;
-  } else {
-    personalFileName.textContent = '';
-  }
-});
+    // File upload handling
+    personalImageInput.addEventListener('change', () => {
+      if (personalImageInput.files.length > 0) {
+        personalFileName.textContent = personalImageInput.files[0].name;
+      } else {
+        personalFileName.textContent = '';
+      }
+    });
 
-sellerImageInput.addEventListener('change', () => {
-  if (sellerImageInput.files.length > 0) {
-    sellerFileName.textContent = sellerImageInput.files[0].name;
-  } else {
-    sellerFileName.textContent = '';
-  }
-});
+    sellerImageInput.addEventListener('change', () => {
+      if (sellerImageInput.files.length > 0) {
+        sellerFileName.textContent = sellerImageInput.files[0].name;
+      } else {
+        sellerFileName.textContent = '';
+      }
+    });
 
-// Handle form submission with fetch API
+ // Form submission with comic effects
 document.querySelectorAll('form').forEach(form => {
   form.addEventListener('submit', function(event) {
     event.preventDefault();
     
     const formData = new FormData(this);
+    const button = this.querySelector('button');
+    button.disabled = true;
+    button.textContent = 'WHOOOSH! SENDING...';
     
     fetch(this.action, {
       method: this.method,
@@ -193,22 +500,42 @@ document.querySelectorAll('form').forEach(form => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-      // Animate current page sliding left
-      document.body.style.animation = 'slideOutLeft 0.8s ease-in forwards';
-
-      setTimeout(() => {
-      window.location.href = data.redirect;
-      }, 400); // Wait for animation to finish
+        document.body.style.animation = 'slideOutLeft 0.8s ease-in forwards';
+        setTimeout(() => {
+          // Use the redirect URL provided by the server
+          window.location.href = data.redirect;
+        }, 400);
       } else {
-        alert(data.message);
+        button.disabled = false;
+        button.textContent = button.textContent.includes('LOGIN') ? 'BAM! LOGIN' : 
+                           button.textContent.includes('PET') ? 'BOOM! SIGN UP' : 'KABOOM! SIGN UP';
+        
+        // Comic-style error bubble
+        const errorBubble = document.createElement('div');
+        errorBubble.className = 'comic-panel';
+        errorBubble.textContent = data.message || 'WHOOPS! SOMETHING WENT WRONG!';
+        errorBubble.style.backgroundColor = 'var(--red)';
+        errorBubble.style.color = 'white';
+        errorBubble.style.position = 'fixed';
+        errorBubble.style.top = '20px';
+        errorBubble.style.left = '50%';
+        errorBubble.style.transform = 'translateX(-50%) rotate(-5deg)';
+        document.body.appendChild(errorBubble);
+        
+        setTimeout(() => {
+          errorBubble.style.animation = 'slideOutRight 0.5s forwards';
+          setTimeout(() => errorBubble.remove(), 500);
+        }, 3000);
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      button.disabled = false;
+      button.textContent = button.textContent.includes('LOGIN') ? 'BAM! LOGIN' : 
+                         button.textContent.includes('PET') ? 'BOOM! SIGN UP' : 'KABOOM! SIGN UP';
     });
   });
 });
-  </script>
+</script>
 </body>
 </html>

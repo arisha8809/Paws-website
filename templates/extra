@@ -1,0 +1,188 @@
+
+<body>
+  <div class="comic-border"></div>
+  
+  <div class="header">
+    <h1>PAWS MARKETPLACE</h1>
+    <p>Find awesome pet products from our sellers!</p>
+  </div>
+
+  <div class="shops-container" id="shops-container">
+    <!-- Shops will be dynamically loaded here -->
+  </div>
+
+  <div class="products-container" id="products-container">
+    <button class="back-to-shops" id="back-to-shops">← Back to Shops</button>
+    <div id="products-grid"></div>
+  </div>
+
+  <!-- FAB Button -->
+  <div class="fixed-action-btn spin-close">
+    <a class="btn-floating">
+      <img src="{{ url_for('static', filename='images/paw.png') }}" alt="Menu" class="paw-icon">
+      <span class="action-label">MENU!</span>
+    </a>
+    <ul>
+      <li>
+        <a href="{{ url_for('home') }}" class="menu-option">
+          <img src="{{ url_for('static', filename='images/home.png') }}" class="icons"> HOME
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('profile', username=session.get('username', '')) }}" class="menu-option">
+          <img src="{{ url_for('static', filename='images/profile.png') }}" class="icons"> PROFILE
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('cart') }}" class="menu-option">
+          <img src="{{ url_for('static', filename='images/cart.png') }}" class="icons"> CART
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // FAB Button functionality
+      const fab = document.querySelector('.fixed-action-btn');
+      const fabButton = fab.querySelector('.btn-floating');
+
+      fabButton.addEventListener('click', function () {
+        fab.classList.toggle('active');
+        
+        if (fab.classList.contains('active')) {
+          fabButton.style.transition = 'all 0.3s ease';
+          fabButton.style.transform = 'scale(1.1)';
+          
+          setTimeout(() => {
+            fabButton.style.transform = 'rotate(15deg)';
+          }, 100);
+        } else {
+          fabButton.style.transform = 'scale(1)';
+        }
+      });
+
+      // Shop and product functionality
+      const shopsContainer = document.getElementById('shops-container');
+      const productsContainer = document.getElementById('products-container');
+      const productsGrid = document.getElementById('products-grid');
+      const backToShopsBtn = document.getElementById('back-to-shops');
+      
+      // Fetch shops from backend
+      fetch('/api/shops')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            renderShops(data.shops);
+          } else {
+            console.error('Error fetching shops:', data.message);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+
+      // Function to render shops
+      function renderShops(shops) {
+        shopsContainer.innerHTML = '';
+        
+        shops.forEach(shop => {
+          const shopCard = document.createElement('div');
+          shopCard.className = 'shop-card';
+          shopCard.innerHTML = `
+            <img src="{{ url_for('static', filename='uploads/') }}${shop.image || 'default-shop.jpg'}" alt="${shop.name}" class="shop-image">
+            <div class="shop-info">
+              <h2 class="shop-name">${shop.name}</h2>
+              <p class="shop-description">${shop.description || 'No description available'}</p>
+              <button class="view-products-btn" data-shop-id="${shop._id}">View Products</button>
+            </div>
+          `;
+          shopsContainer.appendChild(shopCard);
+        });
+
+        // Add event listeners to view products buttons
+        document.querySelectorAll('.view-products-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const shopId = this.getAttribute('data-shop-id');
+            fetchProducts(shopId);
+          });
+        });
+      }
+
+      // Function to fetch products for a shop
+      function fetchProducts(shopId) {
+        fetch(`/api/shops/${shopId}/products`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              showProducts(data.products);
+            } else {
+              console.error('Error fetching products:', data.message);
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+
+      // Back to shops button click handler
+      backToShopsBtn.addEventListener('click', function() {
+        shopsContainer.style.display = 'grid';
+        productsContainer.style.display = 'none';
+      });
+
+      // Function to show products for a specific shop
+      function showProducts(products) {
+        shopsContainer.style.display = 'none';
+        productsContainer.style.display = 'grid';
+        
+        // Clear previous products
+        productsGrid.innerHTML = '';
+        
+        // Add products for the selected shop
+        products.forEach(product => {
+          const productCard = document.createElement('div');
+          productCard.className = 'product-card';
+          productCard.innerHTML = `
+            <img src="{{ url_for('static', filename='uploads/') }}${product.image || 'default-product.jpg'}" alt="${product.name}" class="product-image">
+            <div class="product-info">
+              <h3 class="product-name">${product.name}</h3>
+              <p class="product-description">${product.description || 'No description available'}</p>
+              <p class="product-price">$${product.price.toFixed(2)}</p>
+              <button class="add-to-cart-btn" data-product-id="${product._id}">Add to Cart</button>
+            </div>
+          `;
+          productsGrid.appendChild(productCard);
+        });
+
+        // Add event listeners to the new Add to Cart buttons
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            addToCart(productId);
+          });
+        });
+      }
+
+      // Function to add product to cart
+      function addToCart(productId) {
+        fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ product_id: productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Product added to cart!');
+          } else {
+            alert('Error: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to add to cart');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

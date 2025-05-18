@@ -126,13 +126,29 @@ def login():
     username = request.form['username']
     password = request.form['password']
     user = users_collection.find_one({'username': username})
+    
     if user and check_password_hash(user['password'], password):
         session['user_id'] = str(user['_id'])
         session['username'] = user['username']
         session['profile_type'] = user.get('profile_type', 'personal')
-        return jsonify({'success': True, 'redirect': url_for('home')})
+        
+        # Determine redirect URL based on profile type
+        if user.get('profile_type') == 'seller':
+            return jsonify({
+                'success': True,
+                'redirect': url_for('home_seller'),
+                'profile_type': 'seller'
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'redirect': url_for('home'),
+                'profile_type': 'personal'
+            })
+    
     return jsonify({'success': False, 'message': 'Invalid username or password.'})
-
+    
+    return jsonify({'success': False, 'message': 'Invalid username or password.'})
 @app.route('/create_profile/<profile_type>', methods=['GET', 'POST'])
 def create_profile(profile_type):
     if request.method == 'GET':
@@ -180,7 +196,26 @@ def home():
         session.clear()
         return redirect(url_for('index'))
     return render_template('home.html', user=user)
-
+@app.route('/home_seller')
+def home_seller():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    # Get user from database
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    
+    # Verify user exists and is a seller
+    if not user:
+        session.clear()
+        return redirect(url_for('index'))
+    
+    if user.get('profile_type') != 'seller':
+        flash('You need a seller account to access this page', 'error')
+        return redirect(url_for('home'))
+    
+    # Simply render the seller home template without shop data
+    return render_template('home_seller.html', user=user)
 @app.route('/logout')
 def logout():
     session.clear()
@@ -412,126 +447,407 @@ def delete_scrapbook(scrapbook_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
     
-@app.route('/marketplace')
-def marketplace():
-    return render_template('marketplace.html')
+# Add these collections at the top with your other collections
+products_collection = db["products"]
 
 @app.route('/sell_stuff')
 def sell_stuff():
-    return render_template('sell_stuff.html')
-
-@app.route('/sell')
-def sell():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-
-    user = users_collection.find_one({'_id': ObjectId(user_id)})
-    if not user:
-        return redirect(url_for('login'))
-
-    account_type = user.get('profile_type')
-    if not account_type:
-        flash("Account type not defined. Please update your profile.", "error")
-        return redirect(url_for('profile', username=user['username']))
-
-    shop = None
-    products = []
-
-    if account_type == 'personal':
-        shop_id = user.get('shop_id')
-        if shop_id:
-            shop = db.shops.find_one({'_id': ObjectId(shop_id)})
-    elif account_type == 'seller':
-        shop = db.shops.find_one({'owner_id': ObjectId(user_id)})
-
-    if shop:
-        products = list(db.products.find({'shop_id': shop['_id']}))
-
-    return render_template('sell_stuff.html', user=user, shop=shop, products=products)
-
-
-@app.route('/create_shop', methods=['POST'])
-def create_shop():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-
-    name = request.form['name']
-    description = request.form.get('description', '')
-    image_url = request.form.get('image_url', '')
-
-    shop = {
-        'name': name,
-        'description': description,
-        'image': image_url,
-        'owner_id': ObjectId(user_id)
-    }
-
-    shop_id = db.shops.insert_one(shop).inserted_id
-    users_collection.update_one({'_id': ObjectId(user_id)}, {'$set': {'shop_id': shop_id}})
-    return redirect(url_for('sell'))
-
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    
+    if not user or user.get('profile_type') != 'seller':
+        session.clear()
+        return redirect(url_for('index'))
+    
+    # Get products for this seller
+    products = list(products_collection.find({'seller_id': str(user['_id'])}))
+    
+    return render_template('sell_stuff.html',
+                         user=user,
+                         products=products)
 @app.route('/add_product', methods=['POST'])
 def add_product():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-
-    user = users_collection.find_one({'_id': ObjectId(user_id)})
-    if not user:
-        return redirect(url_for('login'))
-
-    shop_id = user.get('shop_id') or db.shops.find_one({'owner_id': ObjectId(user_id)})['_id']
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
     
-    name = request.form['name']
-    description = request.form['description']
-    price = float(request.form['price'])
-    image_url = request.form['image_url']
-
-    if not image_url:
-        flash("Product image is required.", "error")
-        return redirect(url_for('sell'))
-
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    if not user or user.get('profile_type') != 'seller':
+        return redirect(url_for('index'))
+    
+    # Handle file upload
+    image_file = request.files.get('image')
+    if not image_file or image_file.filename == '':
+        flash('Product image is required', 'error')
+        return redirect(url_for('sell_stuff'))
+    
+    image_filename = save_file(image_file)
+    if not image_filename:
+        flash('Invalid image file', 'error')
+        return redirect(url_for('sell_stuff'))
+    
+    # Create new product
     product = {
-        'shop_id': shop_id,
-        'name': name,
-        'description': description,
-        'price': price,
-        'image': image_url
+        'name': request.form['name'],
+        'description': request.form['description'],
+        'price': float(request.form['price']),
+        'image': image_filename,
+        'seller_id': str(user['_id']),  # Reference to seller/user
+        'created_at': datetime.utcnow()
     }
+    
+    products_collection.insert_one(product)
+    flash('Product added successfully!', 'success')
+    return redirect(url_for('sell_stuff'))
 
-    db.products.insert_one(product)
-    return redirect(url_for('sell'))
 
-@app.route('/delete_product/<product_id>', methods=['POST'])
-def delete_product(product_id):
-    db.products.delete_one({'_id': ObjectId(product_id)})
-    return redirect(url_for('sell'))
-
-@app.route('/edit_product/<product_id>', methods=['POST'])
-def edit_product(product_id):
-    name = request.form['name']
-    description = request.form['description']
-    price = float(request.form['price'])
-
-    update_data = {
-        'name': name,
-        'description': description,
-        'price': price
+@app.route('/update_product', methods=['POST'])
+def update_product():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    if not user or user.get('profile_type') != 'seller':
+        return redirect(url_for('index'))
+    
+    product_id = request.form['product_id']
+    product = products_collection.find_one({'_id': ObjectId(product_id)})
+    
+    if not product or product['seller_id'] != str(user['_id']):
+        abort(403)
+    
+    updates = {
+        'name': request.form['name'],
+        'description': request.form['description'],
+        'price': float(request.form['price']),
+        'updated_at': datetime.utcnow()
     }
-
+    
+    # Handle image update if provided
     if 'image' in request.files:
         image_file = request.files['image']
         if image_file.filename != '':
-            filename = secure_filename(image_file.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(image_path)
-            update_data['image'] = image_path
+            filename = save_file(image_file)
+            if filename:
+                updates['image'] = filename
+    
+    products_collection.update_one(
+        {'_id': ObjectId(product_id)},
+        {'$set': updates}
+    )
+    
+    flash('Product updated successfully!', 'success')
+    return redirect(url_for('sell_stuff'))
 
-    db.products.update_one({'_id': ObjectId(product_id)}, {'$set': update_data})
-    return redirect(url_for('sell'))
+@app.route('/delete_product', methods=['POST'])
+def delete_product():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    product_id = request.form['product_id']
+    product = products_collection.find_one({'_id': ObjectId(product_id)})
+    
+    if not product or not user or product['seller_id'] != str(user['_id']):
+        abort(403)
+    
+    products_collection.delete_one({'_id': ObjectId(product_id)})
+    flash('Product deleted successfully!', 'success')
+    return redirect(url_for('sell_stuff'))
 
+@app.route('/update_seller_profile', methods=['POST'])
+def update_seller_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    if not user or user.get('profile_type') != 'seller':
+        return redirect(url_for('index'))
+    
+    updates = {
+        'shop_name': request.form['shop_name'],
+        'description': request.form.get('description', '')
+    }
+    
+    # Handle image update if provided
+    if 'profile_image' in request.files:
+        image_file = request.files['profile_image']
+        if image_file.filename != '':
+            filename = save_file(image_file)
+            if filename:
+                updates['profile_image'] = filename
+    
+    users_collection.update_one(
+        {'_id': user['_id']},
+        {'$set': updates}
+    )
+    
+    flash('Profile updated successfully!', 'success')
+    return redirect(url_for('sell_stuff'))
+@app.route('/marketplace')
+def marketplace():
+    try:
+        # Get all sellers who have shops
+        sellers_with_shops = users_collection.find({
+            'profile_type': 'seller',
+            'shop_name': {'$exists': True}
+        })
+        
+        # Prepare shops data from users collection
+        shops = []
+        for seller in sellers_with_shops:
+            shop = {
+                '_id': str(seller['_id']),
+                'name': seller.get('shop_name', 'Unnamed Shop'),
+                'description': seller.get('description', ''),
+                'owner_id': str(seller['_id']),
+                'owner_name': seller['username'],
+                'image': seller.get('profile_image', '')
+            }
+            # Count products for this seller/shop
+            shop['product_count'] = products_collection.count_documents({
+                'seller_id': str(seller['_id'])
+            })
+            shops.append(shop)
+        
+        # Get featured products
+        featured_products = []
+        products = list(products_collection.find().limit(8))
+        
+        for product in products:
+            product['_id'] = str(product['_id'])
+            # Get seller/shop info
+            seller = users_collection.find_one({'_id': ObjectId(product['seller_id'])})
+            if seller:
+                product['shop_name'] = seller.get('shop_name', 'Unnamed Shop')
+                product['seller_name'] = seller['username']
+            else:
+                product['shop_name'] = 'Unknown Shop'
+                product['seller_name'] = 'Unknown'
+            featured_products.append(product)
+        
+        return render_template('marketplace.html', 
+                            shops=shops,
+                            featured_products=featured_products)
+    
+    except Exception as e:
+        print(f"Error in marketplace route: {str(e)}")
+        flash("An error occurred while loading the marketplace", "error")
+        return redirect(url_for('home'))
+# Add these new routes to your existing app.py
+@app.route('/api/sellers/<seller_id>/products')
+def get_seller_products(seller_id):
+    try:
+        products = list(products_collection.find({'seller_id': seller_id}))
+        for product in products:
+            product['_id'] = str(product['_id'])
+            # Get seller/shop info
+            seller = users_collection.find_one({'_id': ObjectId(seller_id)})
+            if seller:
+                product['shop_name'] = seller.get('shop_name', 'Unnamed Shop')
+            else:
+                product['shop_name'] = 'Unknown Shop'
+        return jsonify({'success': True, 'products': products})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+# API Routes for Marketplace
+@app.route('/api/shops')
+def get_shops():
+    try:
+        shops = list(db.shops.find())
+        for shop in shops:
+            shop['_id'] = str(shop['_id'])
+            owner = users_collection.find_one({'_id': ObjectId(shop['owner_id'])})
+            shop['owner_name'] = owner['username'] if owner else "Unknown"
+        return jsonify({'success': True, 'shops': shops})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
+@app.route('/api/shops/<shop_id>/products')
+def get_shop_products(shop_id):
+    try:
+        products = list(products_collection.find({'shop_id': ObjectId(shop_id)}))
+        for product in products:
+            product['_id'] = str(product['_id'])
+            # Get shop name
+            shop = db.shops.find_one({'_id': ObjectId(shop_id)})
+            product['shop_name'] = shop['name'] if shop else "Unknown Shop"
+        return jsonify({'success': True, 'products': products})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+# Cart API Routes
+@app.route('/cart')
+def cart():
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+    
+    user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+    if not user:
+        session.clear()
+        return redirect(url_for('index'))
+    
+    return render_template('cart.html', user=user)
+@app.route('/api/cart')
+def get_cart():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    try:
+        user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        cart_items = []
+        subtotal = 0
+        
+        # Get cart items with product details
+        if 'cart' in user:
+            for item in user['cart']:
+                product = products_collection.find_one({'_id': ObjectId(item['product_id'])})
+                if product:
+                    product['_id'] = str(product['_id'])
+                    cart_items.append({
+                        'product': product,
+                        'quantity': item['quantity']
+                    })
+                    subtotal += product['price'] * item['quantity']
+        
+        shipping = 5.99 if subtotal > 0 else 0
+        total = subtotal + shipping
+        
+        return jsonify({
+            'success': True,
+            'cart_items': cart_items,
+            'total': {
+                'subtotal': subtotal,
+                'shipping': shipping,
+                'total': total
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/cart/add', methods=['POST'])
+def add_to_cart():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    try:
+        data = request.get_json()
+        product_id = data.get('product_id')
+        
+        if not product_id:
+            return jsonify({'success': False, 'message': 'Product ID is required'})
+        
+        # Verify product exists
+        product = products_collection.find_one({'_id': ObjectId(product_id)})
+        if not product:
+            return jsonify({'success': False, 'message': 'Product not found'})
+        
+        # Update user's cart
+        user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        cart = user.get('cart', [])
+        
+        # Check if product already in cart
+        found = False
+        for item in cart:
+            if item['product_id'] == product_id:
+                item['quantity'] += 1
+                found = True
+                break
+        
+        if not found:
+            cart.append({
+                'product_id': product_id,
+                'quantity': 1
+            })
+        
+        users_collection.update_one(
+            {'_id': user['_id']},
+            {'$set': {'cart': cart}}
+        )
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/cart/update', methods=['POST'])
+def update_cart_item():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    try:
+        data = request.get_json()
+        product_id = data.get('product_id')
+        change = data.get('change', 0)
+        
+        if not product_id:
+            return jsonify({'success': False, 'message': 'Product ID is required'})
+        
+        # Update user's cart
+        user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        cart = user.get('cart', [])
+        updated_cart = []
+        item_removed = False
+        
+        for item in cart:
+            if item['product_id'] == product_id:
+                new_quantity = item['quantity'] + change
+                if new_quantity > 0:
+                    item['quantity'] = new_quantity
+                    updated_cart.append(item)
+                else:
+                    item_removed = True
+            else:
+                updated_cart.append(item)
+        
+        users_collection.update_one(
+            {'_id': user['_id']},
+            {'$set': {'cart': updated_cart}}
+        )
+        
+        return jsonify({
+            'success': True,
+            'item_removed': item_removed
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/cart/remove', methods=['POST'])
+def remove_from_cart():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+    
+    try:
+        data = request.get_json()
+        product_id = data.get('product_id')
+        
+        if not product_id:
+            return jsonify({'success': False, 'message': 'Product ID is required'})
+        
+        # Update user's cart
+        user = users_collection.find_one({'_id': ObjectId(session['user_id'])})
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        cart = user.get('cart', [])
+        updated_cart = [item for item in cart if item['product_id'] != product_id]
+        
+        users_collection.update_one(
+            {'_id': user['_id']},
+            {'$set': {'cart': updated_cart}}
+        )
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 if __name__ == '__main__':
     app.run(debug=True)

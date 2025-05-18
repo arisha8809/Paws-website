@@ -3,22 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scrapbook Editor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&family=Shadows+Into+Light&family=Permanent+Marker&family=Dancing+Script&family=Comic+Neue&display=swap" rel="stylesheet">
+    <title>Panks - Comic Scrapbook Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bubblegum+Sans&family=Comic+Neue:wght@400;700&family=Permanent+Marker&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* Scrapbook Editor Specific Styles */
+        /* Comic Book Style */
+        :root {
+            --primary-color: #e63946;
+            --secondary-color: #457b9d;
+            --accent-color: #ffbe0b;
+            --dark-color: #1d3557;
+            --light-color: #f1faee;
+            --comic-border: 3px solid #000;
+            --comic-shadow: 5px 5px 0 #000;
+        }
+        
         body {
-            background-color: rgb(57, 130, 133);
-            color: black;
-            font-family: 'Bricolage Grotesque', sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            font-family: 'Comic Neue', cursive;
+            background-image: url('https://www.transparenttextures.com/patterns/cartographer.png');
+            margin: 0;
+            padding: 0;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+        }
+        
+        .comic-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .comic-header h1 {
+            font-family: 'Bangers', cursive;
+            font-size: 4rem;
+            color: var(--primary-color);
+            text-shadow: 3px 3px 0 #000, 6px 6px 0 rgba(0,0,0,0.2);
+            margin: 0;
+            letter-spacing: 2px;
+            -webkit-text-stroke: 1px black;
+        }
+        
+        .comic-header h2 {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin: 0;
+            text-shadow: 2px 2px 0 #000;
+            -webkit-text-stroke: 0.5px black;
+            letter-spacing: 1px;
         }
         
         .editor-container {
@@ -31,11 +69,25 @@
         .editor-sidebar {
             width: 280px;
             padding: 20px;
-            background: blanchedalmond;
+            background: white;
             border-radius: 10px;
             overflow-y: auto;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            border: 1px solid #ffffff;
+            box-shadow: var(--comic-shadow);
+            border: var(--comic-border);
+            background-color: #fff;
+            position: relative;
+        }
+        
+        .editor-sidebar::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px dashed rgba(0,0,0,0.2);
+            border-radius: 5px;
+            pointer-events: none;
         }
         
         .editor-main {
@@ -47,12 +99,13 @@
         
         .editor-canvas {
             flex-grow: 1;
-            background-color: black;
-            border: 1px solid #333;
+            background-color: white;
+            border: var(--comic-border);
             border-radius: 10px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: var(--comic-shadow);
+            background-color: #fff;
         }
         
         .scrapbook-page-editor {
@@ -60,7 +113,7 @@
             height: 100%;
             position: relative;
             background-color: #ffffff;
-            background-image: url('static\backgrounds\bg.jpg');
+            background-image: url('https://www.transparenttextures.com/patterns/notebook.png');
         }
         
         .editor-controls {
@@ -68,32 +121,38 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 20px;
-            background: blanchedalmond;
+            background: white;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            border: 1px solid #333;
+            box-shadow: var(--comic-shadow);
+            border: var(--comic-border);
+            background-color: var(--accent-color);
+            font-family: 'Bangers', cursive;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
         }
         
         .draggable-element {
             position: absolute;
             cursor: move;
             user-select: none;
-            transition: box-shadow 0.2s ease;
+            transition: transform 0.2s ease;
             border-radius: 3px;
         }
         
         .draggable-element:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: scale(1.02) rotate(-1deg);
         }
         
         .draggable-element.selected {
-            border: 2px dashed #4a90e2;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 3px dashed var(--primary-color);
+            box-shadow: 0 0 0 3px var(--accent-color);
         }
         
         .draggable-element.text-element {
             background-color: transparent;
             padding: 8px;
+            min-width: 100px;
+            min-height: 40px;
         }
         
         .draggable-element.image-element,
@@ -102,16 +161,47 @@
             overflow: hidden;
         }
         
-        /* Paper effect for elements */
-        .paper-effect {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transform: rotate(var(--rotation));
-            padding: 10px;
+        /* Comic speech bubble effect */
+        .speech-bubble {
+            position: relative;
+            background: white;
+            border: var(--comic-border);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 2px 2px 0 #000;
         }
         
-        .image-paper {
-            padding: 10px;
-            transform: rotate(var(--rotation));
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 20px;
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: white transparent;
+            display: block;
+            width: 0;
+            filter: drop-shadow(2px 2px 0 #000);
+        }
+        
+        .speech-bubble:before {
+            content: '';
+            position: absolute;
+            bottom: -18px;
+            left: 19px;
+            border-width: 16px 16px 0;
+            border-style: solid;
+            border-color: black transparent;
+            display: block;
+            width: 0;
+        }
+        
+        /* Comic panel effect */
+        .comic-panel {
+            background: white;
+            border: var(--comic-border);
+            box-shadow: 3px 3px 0 #000;
+            padding: 5px;
         }
         
         .element-controls {
@@ -120,11 +210,12 @@
             top: 5px;
             display: flex;
             gap: 5px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.9);
             border-radius: 5px;
-            padding: 3px;
+            padding: 5px;
             z-index: 100;
             display: none;
+            border: 2px solid white;
         }
         
         .element-controls button {
@@ -132,15 +223,17 @@
             height: 24px;
             padding: 2px;
             border-radius: 3px;
-            background: #d6dbe4;
-            border: none;
+            background: var(--accent-color);
+            border: 1px solid #000;
             font-size: 12px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: transform 0.2s;
         }
         
         .element-controls button:hover {
-            background: #577968;
+            transform: scale(1.1);
+            background: var(--primary-color);
+            color: white;
         }
         
         .draggable-element:hover .element-controls {
@@ -149,39 +242,47 @@
         
         .context-menu {
             position: absolute;
-            background: #ffffff;
-            border: 1px solid #333;
+            background: white;
+            border: var(--comic-border);
             border-radius: 5px;
             padding: 5px 0;
             min-width: 150px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: var(--comic-shadow);
             z-index: 1000;
             display: none;
+            font-family: 'Comic Neue', cursive;
         }
         
         .context-menu-item {
             padding: 8px 12px;
             cursor: pointer;
-            color: white;
+            color: var(--dark-color);
             transition: background 0.2s;
+            border-bottom: 1px solid #eee;
         }
         
         .context-menu-item:hover {
-            background: #224137;
+            background: var(--accent-color);
+            color: black;
+        }
+        
+        .context-menu-item:last-child {
+            border-bottom: none;
         }
         
         .resize-handle {
             position: absolute;
-    
-            width: 12px;
-            height: 12px;
-            background-color: #4a90e2;
+            width: 16px;
+            height: 16px;
+            background-color: var(--primary-color);
             border-radius: 50%;
-            bottom: -6px;
-            right: -6px;
+            bottom: -8px;
+            right: -8px;
             cursor: nwse-resize;
             z-index: 50;
             display: none;
+            border: 2px solid white;
+            box-shadow: 1px 1px 0 #000;
         }
         
         .draggable-element.selected .resize-handle {
@@ -195,42 +296,54 @@
         }
         
         .page-controls button {
-            padding: 8px 12px;
+            padding: 8px 16px;
             border-radius: 5px;
-            border: none;
-            background: rgb(20,42,43);
+            border: var(--comic-border);
+            background: var(--secondary-color);
             color: white;
             cursor: pointer;
-            transition: background 0.2s;
-            font-family: 'Bricolage Grotesque', sans-serif;
+            transition: all 0.2s;
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+            font-size: 1rem;
+            text-shadow: 1px 1px 0 #000;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .page-controls button:hover {
-            background: rgb(39, 78, 80);
+            transform: translate(2px, 2px);
+            box-shadow: none;
+            background: var(--primary-color);
         }
         
         .page-controls button.delete-page {
-            background: #933;
+            background: var(--primary-color);
         }
         
         .page-controls button.delete-page:hover {
-            background: #c33;
+            background: #c1121f;
         }
         
         .sidebar-section {
             margin-bottom: 25px;
-            background: rgb(57,130,133);
+            background: white;
             border-radius: 8px;
             padding: 15px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            border: 2px solid #000;
+            position: relative;
+            overflow: hidden;
         }
         
         .sidebar-section h3 {
             margin-bottom: 15px;
-            border-bottom: 1px solid #444;
+            border-bottom: 2px solid var(--dark-color);
             padding-bottom: 8px;
-            color: black;
-            font-size: 16px;
+            color: var(--dark-color);
+            font-size: 1.3rem;
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         
         .elements-grid, .stickers-grid, .backgrounds-grid {
@@ -241,20 +354,23 @@
         }
         
         .element-item, .sticker-item, .background-item {
-            background: rgb(20,42,43);
+            background: white;
             border-radius: 8px;
             padding: 10px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-            border: 1px solid #444;
-            color: white;
+            transition: all 0.2s;
+            border: var(--comic-border);
+            color: var(--dark-color);
+            font-family: 'Comic Neue', cursive;
+            font-weight: bold;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .element-item:hover, .sticker-item:hover, .background-item:hover {
-            transform: translateY(-2px);
-            background: rgb(39, 78, 80);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            transform: translate(-2px, -2px);
+            background: var(--accent-color);
+            box-shadow: 4px 4px 0 #000;
         }
         
         .sticker-item img, .background-item img {
@@ -271,23 +387,28 @@
         .form-item label {
             display: block;
             margin-bottom: 8px;
-            color: #ccc;
-            font-size: 14px;
+            color: var(--dark-color);
+            font-size: 1rem;
+            font-family: 'Comic Neue', cursive;
+            font-weight: bold;
         }
         
         .form-item input, .form-item select {
             width: 90%;
             padding: 10px;
             border-radius: 5px;
-            border: 1px solid #444;
-            background: rgb(20,42,43);
-            color: white;
-            font-family: 'Bricolage Grotesque', sans-serif;
+            border: var(--comic-border);
+            background: white;
+            color: var(--dark-color);
+            font-family: 'Comic Neue', cursive;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .form-item input[type="color"] {
             height: 40px;
             padding: 2px;
+            cursor: pointer;
+            border: 3px solid #000;
         }
         
         /* Text styling controls */
@@ -300,22 +421,27 @@
         
         .text-style-btn {
             padding: 8px;
-            border: 1px solid #444;
+            border: var(--comic-border);
             border-radius: 5px;
-            background: #333;
-            color: white;
+            background: white;
+            color: var(--dark-color);
             cursor: pointer;
             text-align: center;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            font-weight: bold;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .text-style-btn:hover {
-            background: rgb(39, 78, 80);
+            background: var(--accent-color);
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 #000;
         }
         
         .text-style-btn.active {
-            background: #4a90e2;
-            border-color: #2a70c2;
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--dark-color);
         }
         
         .font-selector {
@@ -323,10 +449,11 @@
             margin-top: 10px;
             padding: 8px;
             border-radius: 5px;
-            border: 1px solid #444;
-            background: #333;
-            color: white;
-            font-family: 'Bricolage Grotesque', sans-serif;
+            border: var(--comic-border);
+            background: white;
+            color: var(--dark-color);
+            font-family: 'Comic Neue', cursive;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .text-color-picker {
@@ -341,16 +468,18 @@
             height: 24px;
             border-radius: 50%;
             cursor: pointer;
-            border: 2px solid transparent;
+            border: 2px solid #000;
             transition: transform 0.2s;
+            box-shadow: 1px 1px 0 #000;
         }
         
         .color-option:hover {
-            transform: scale(1.1);
+            transform: scale(1.2);
         }
         
         .color-option.active {
             border-color: white;
+            box-shadow: 0 0 0 3px var(--primary-color);
         }
         
         /* Page turn animation */
@@ -381,7 +510,6 @@
             display: inline-block;
             cursor: pointer;
             width: 100%;
-            height:100%
         }
         
         .image-upload input[type=file] {
@@ -395,18 +523,24 @@
         
         .upload-btn {
             display: block;
-            background: rgb(20,42,43);
+            background: var(--secondary-color);
             color: white;
             border-radius: 5px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
-            transition: background 0.3s;
+            transition: all 0.3s;
             margin-top: 10px;
-            border: 1px solid #444;
+            border: var(--comic-border);
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #000;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .upload-btn:hover {
-            background: rgb(39, 78, 80);
+            background: var(--primary-color);
+            transform: translate(2px, 2px);
+            box-shadow: none;
         }
         
         /* Back to profile button */
@@ -414,76 +548,111 @@
             display: inline-block;
             margin-top: 20px;
             margin-bottom: 20px;
-            color: #ccc;
+            color: white;
             text-decoration: none;
             padding: 10px 18px;
             border-radius: 5px;
-            background: rgb(20,42,43);
+            background: var(--secondary-color);
             transition: all 0.3s ease;
-            border: 1px solid #333;
+            border: var(--comic-border);
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #000;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .back-button:hover {
-            background: rgb(39, 78, 80);
+            background: var(--primary-color);
             color: white;
+            transform: translate(2px, 2px);
+            box-shadow: none;
         }
         
         .option-button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-top: 10px;
-            background: #4a90e2;
+            background: var(--secondary-color);
             color: white;
-            border: none;
+            border: var(--comic-border);
             border-radius: 5px;
             cursor: pointer;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            transition: background 0.2s;
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            text-shadow: 1px 1px 0 #000;
+            box-shadow: 2px 2px 0 #000;
         }
         
         .option-button:hover {
-            background: #2a70c2;
+            background: var(--primary-color);
+            transform: translate(2px, 2px);
+            box-shadow: none;
         }
         
-        /* Polaroid effect */
-        .polaroid {
-            background: white;
-            padding: 10px 10px 30px 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        .tape {
+        /* Comic explosion effect */
+        .explosion {
             position: absolute;
-            width: 40px;
-            height: 15px;
-            background-color: rgba(134, 123, 123, 0.5);
-            transform: rotate(var(--tape-rotation));
-            top: -5px;
-            left: 50%;
-            margin-left: -20px;
-            opacity: 0.7;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://media.giphy.com/media/XUFPGrX5Zis6Y/giphy.gif');
+            background-size: cover;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
         
-        /* Cover preview styling */
-        #cover-preview {
-            margin-top: 10px;
-            text-align: center;
-            background: rgb(57, 130, 133);
-            padding: 10px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        /* Comic fonts for text elements */
+        .comic-font-default {
+            font-family: 'Comic Neue', cursive;
         }
         
-        #cover-preview img {
-            max-width: 100%;
-            max-height: 120px;
-            border-radius: 5px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        .comic-font-handwritten {
+            font-family: 'Permanent Marker', cursive;
+        }
+        
+        .comic-font-bold {
+            font-family: 'Bangers', cursive;
+        }
+        
+        .comic-font-fun {
+            font-family: 'Bubblegum Sans', cursive;
+        }
+        
+        /* POW effect for adding elements */
+        @keyframes pow {
+            0% { transform: scale(0.1) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        .pow-effect {
+            animation: pow 0.5s ease-out;
+        }
+        
+        /* Comic dots background for empty elements */
+        .comic-dots {
+            background-image: radial-gradient(#000 10%, transparent 10%);
+            background-size: 10px 10px;
+            background-color: white;
+        }
+        
+        /* Sticker outline effect */
+        .sticker-outline {
+            filter: drop-shadow(2px 2px 0 #000) drop-shadow(-2px -2px 0 #fff);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('profile', username=session.get('username')) }}" class="back-button">← Back to Profile</a>
+        <div class="comic-header">
+            <h1>PANKS</h1>
+            <h2>WELCOME TO YOUR DOG'S COMIC SCRAPBOOK!</h2>
+        </div>
+        
+        <a href="{{ url_for('profile', username=session.get('username')) }}" class="back-button">← BACK TO PROFILE</a>
         
         <div class="editor-container">
             <!-- Sidebar for tools and elements -->
@@ -492,17 +661,17 @@
                     <h3>Scrapbook Settings</h3>
                     <div class="form-item">
                         <label for="scrapbook-title">Title:</label>
-                        <input type="text" id="scrapbook-title" value="{{ scrapbook.title if scrapbook else 'My New Scrapbook' }}">
+                        <input type="text" id="scrapbook-title" value="{{ scrapbook.title if scrapbook else 'My Dog\'s Comic Adventure' }}">
                     </div>
                     <div class="form-item">
                         <label for="scrapbook-cover">Cover Image:</label>
                         <div class="image-upload">
-                            <div class="upload-btn">Upload Cover Image</div>
+                            <div class="upload-btn">UPLOAD COVER</div>
                             <input type="file" id="cover-upload" accept="image/*">
                         </div>
                         <div id="cover-preview" style="margin-top: 10px; text-align: center;">
                             {% if scrapbook and scrapbook.cover_image %}
-                                <img src="{{ scrapbook.cover_image }}" style="max-width: 100%; max-height: 100px; border-radius: 5px;">
+                                <img src="{{ scrapbook.cover_image }}" style="max-width: 100%; max-height: 100px; border-radius: 5px; border: var(--comic-border); box-shadow: 2px 2px 0 #000;">
                             {% endif %}
                         </div>
                     </div>
@@ -513,21 +682,21 @@
                             <option value="public" {% if scrapbook and scrapbook.privacy == "public" %}selected{% endif %}>Public</option>
                         </select>
                     </div>
-                    <button class="option-button" onclick="saveScrapbook()">Save Scrapbook</button>
+                    <button class="option-button" onclick="saveScrapbook()">SAVE SCRAPBOOK</button>
                 </div>
                 
                 <div class="sidebar-section">
                     <h3>Add Elements</h3>
                     <div class="elements-grid">
                         <div class="element-item" onclick="addElement('text')">
-                            <i class="fas fa-font"></i> Text
+                            <i class="fas fa-font"></i> TEXT BUBBLE
                         </div>
                         <div class="element-item" onclick="showImageUpload()">
-                            <i class="fas fa-image"></i> Image
+                            <i class="fas fa-image"></i> DOG PHOTO
                         </div>
                     </div>
                     <div class="image-upload" style="display: none;" id="image-upload-container">
-                        <div class="upload-btn">Upload Image</div>
+                        <div class="upload-btn">UPLOAD PHOTO</div>
                         <input type="file" id="image-upload" accept="image/*">
                     </div>
                 </div>
@@ -537,17 +706,16 @@
                     <div class="form-item">
                         <label for="font-family">Font:</label>
                         <select id="font-family" class="font-selector" onchange="updateTextStyle('fontFamily', this.value)">
-                            <option value="Arial">Default</option>
-                            <option value="'Shadows Into Light', cursive">Handwritten</option>
-                            <option value="'Permanent Marker', cursive">Marker</option>
-                            <option value="'Dancing Script', cursive">Script</option>
-                            <option value="'Comic Neue', cursive">Comic</option>
+                            <option value="'Comic Neue', cursive">Comic Default</option>
+                            <option value="'Permanent Marker', cursive">Handwritten</option>
+                            <option value="'Bangers', cursive">Bold Title</option>
+                            <option value="'Bubblegum Sans', cursive">Fun Font</option>
                         </select>
                     </div>
                     <div class="form-item">
                         <label for="font-size">Size:</label>
-                        <input type="range" id="font-size" min="12" max="48" value="16" onchange="updateTextStyle('fontSize', this.value + 'px')">
-                        <span id="font-size-value">16px</span>
+                        <input type="range" id="font-size" min="12" max="72" value="24" onchange="updateTextStyle('fontSize', this.value + 'px')">
+                        <span id="font-size-value">24px</span>
                     </div>
                     <div class="form-item">
                         <label>Style:</label>
@@ -578,24 +746,18 @@
                             <div class="color-option" style="background-color: #000000;" onclick="updateTextStyle('color', '#000000')"></div>
                             <div class="color-option" style="background-color: #e63946;" onclick="updateTextStyle('color', '#e63946')"></div>
                             <div class="color-option" style="background-color: #2a9d8f;" onclick="updateTextStyle('color', '#2a9d8f')"></div>
-                            <div class="color-option" style="background-color: #e9c46a;" onclick="updateTextStyle('color', '#e9c46a')"></div>
-                            <div class="color-option" style="background-color: #264653;" onclick="updateTextStyle('color', '#264653')"></div>
+                            <div class="color-option" style="background-color: #ffbe0b;" onclick="updateTextStyle('color', '#ffbe0b')"></div>
+                            <div class="color-option" style="background-color: #1d3557;" onclick="updateTextStyle('color', '#1d3557')"></div>
                             <div class="color-option" style="background-color: #6a0dad;" onclick="updateTextStyle('color', '#6a0dad')"></div>
                             <div class="color-option" style="background-color: #4a90e2;" onclick="updateTextStyle('color', '#4a90e2')"></div>
                             <div class="color-option" style="background-color: #ff9f1c;" onclick="updateTextStyle('color', '#ff9f1c')"></div>
                         </div>
                     </div>
-                    <div class="form-item">
-                        <label>Paper Style:</label>
-                        <div class="paper-style-controls">
-                            <input type="checkbox" id="enable-paper-effect" onchange="togglePaperEffect(this.checked)">
-                            <label for="enable-paper-effect">Apply Paper Effect</label>
-                        </div>
-                    </div>
+                    
                 </div>
                 
                 <div class="sidebar-section">
-                    <h3>Stickers</h3>
+                    <h3>Comic Stickers</h3>
                     <div class="stickers-grid" id="stickers-grid">
                         <!-- Stickers will be loaded here -->
                     </div>
@@ -616,12 +778,12 @@
             <!-- Main editor area -->
             <div class="editor-main">
                 <div class="editor-controls">
-                    <span>Page: <span id="current-page-number">1</span> / <span id="total-page-number">1</span></span>
+                    <span>PAGE: <span id="current-page-number">1</span> / <span id="total-page-number">1</span></span>
                     <div class="page-controls">
-                        <button onclick="prevPage()">Previous</button>
-                        <button onclick="nextPage()">Next</button>
-                        <button onclick="addPage()">Add Page</button>
-                        <button onclick="deletePage()" class="delete-page">Delete Page</button>
+                        <button onclick="prevPage()">PREV</button>
+                        <button onclick="nextPage()">NEXT</button>
+                        <button onclick="addPage()">ADD PAGE</button>
+                        <button onclick="deletePage()" class="delete-page">DELETE</button>
                     </div>
                 </div>
                 
@@ -635,6 +797,7 @@
                         <div class="context-menu-item" onclick="contextMenuAction('sendToBack')">Send to Back</div>
                         <div class="context-menu-item" onclick="contextMenuAction('delete')">Delete Element</div>
                         <div class="context-menu-item" onclick="contextMenuAction('rotate')">Rotate</div>
+                        <div class="context-menu-item" onclick="contextMenuAction('comicEffect')">Comic Effect</div>
                     </div>
                 </div>
             </div>
@@ -664,31 +827,31 @@
         const contextMenu = document.getElementById("context-menu");
         let contextMenuTargetIndex = -1;
         
-        // Available stickers and backgrounds (these would be loaded from your server)
+        // Available stickers and backgrounds (comic themed)
         const stickers = [
             '/static/stickers/1.png',
             '/static/stickers/2.png',
             '/static/stickers/3.png',
-            '/static/stickers/4.jpg',
-            '/static/stickers/5.jpg',
-            '/static/stickers/6.png',
-            '/static/stickers/7.png',
-            '/static/stickers/8.png',
-            '/static/stickers/9.png',
-            '/static/stickers/10.png',
-            '/static/stickers/11.png',
-            '/static/stickers/12.png'
+            '/static/stickers/dog-bone.png',
+            '/static/stickers/dog-paw.png',
+            '/static/stickers/comic-bang.png',
+            '/static/stickers/comic-pow.png',
+            '/static/stickers/comic-zap.png',
+            '/static/stickers/comic-woof.png',
+            '/static/stickers/comic-star.png',
+            '/static/stickers/comic-heart.png',
+            '/static/stickers/comic-splash.png'
         ];
         
         const backgrounds = [
-            '/static/backgrounds/1.jpg',
-            '/static/backgrounds/2.jpg',
-            '/static/backgrounds/3.jpg',
-            '/static/backgrounds/4.jpg',
-            '/static/backgrounds/5.jpg',
-            '/static/backgrounds/6.jpg',
-            '/static/backgrounds/7.jpg',
-            '/static/backgrounds/8.jpg'
+            '/static/backgrounds/comic1.jpg',
+            '/static/backgrounds/comic2.jpg',
+            '/static/backgrounds/comic3.jpg',
+            '/static/backgrounds/comic4.jpg',
+            '/static/backgrounds/park.jpg',
+            '/static/backgrounds/beach.jpg',
+            '/static/backgrounds/dog-house.jpg',
+            '/static/backgrounds/comic-dots.png'
         ];
         
         // Populate stickers grid
@@ -697,8 +860,11 @@
             stickers.forEach(sticker => {
                 const stickerItem = document.createElement('div');
                 stickerItem.className = 'sticker-item';
-                stickerItem.innerHTML = `<img src="${sticker}" alt="Sticker">`;
-                stickerItem.onclick = () => addSticker(sticker);
+                stickerItem.innerHTML = `<img src="${sticker}" alt="Sticker" class="sticker-outline">`;
+                stickerItem.onclick = () => {
+                    addSticker(sticker);
+                    showExplosionEffect();
+                };
                 stickersGrid.appendChild(stickerItem);
             });
         }
@@ -710,9 +876,21 @@
                 const bgItem = document.createElement('div');
                 bgItem.className = 'background-item';
                 bgItem.innerHTML = `<img src="${bg}" alt="Background">`;
-                bgItem.onclick = () => changePageBackground(bg, 'image');
+                bgItem.onclick = () => {
+                    changePageBackground(bg, 'image');
+                    showExplosionEffect();
+                };
                 backgroundsGrid.appendChild(bgItem);
             });
+        }
+        
+        // Show comic explosion effect
+        function showExplosionEffect() {
+            const explosion = document.getElementById('explosion-effect');
+            explosion.style.opacity = '1';
+            setTimeout(() => {
+                explosion.style.opacity = '0';
+            }, 500);
         }
         
         // Add a text element to the current page
@@ -722,25 +900,23 @@
             
             let newElement = {
                 type: type,
-                content: type === "text" ? "Double-click to edit this text" : "",
+                content: type === "text" ? "WOOF! Edit me!" : "",
                 position: { x: 50 + Math.random() * 50, y: 50 + Math.random() * 50 },
                 size: { width: type === "text" ? 200 : 150, height: type === "text" ? 80 : 150 },
                 zIndex: page.elements.length + 1,
                 rotation: rotation,
                 style: type === "text" ? { 
-                    fontFamily: "Arial", 
-                    fontSize: "16px", 
+                    fontFamily: "'Comic Neue', cursive", 
+                    fontSize: "24px", 
                     color: "#000000", 
                     textAlign: "left",
                     fontWeight: "normal",
                     fontStyle: "normal",
-                    textDecoration: "none",
-                    paperEffect: false
+                    textDecoration: "none"
                 } : {},
                 effects: {
-                    paperEffect: false,
-                    polaroid: false,
-                    tape: false
+                    speechBubble: true,
+                    comicPanel: false
                 }
             };
             
@@ -754,6 +930,13 @@
             if (type === "text") {
                 document.getElementById("text-styling-section").style.display = "block";
             }
+            
+            // Add POW effect
+            const elements = document.querySelectorAll('.draggable-element');
+            elements[elements.length - 1].classList.add('pow-effect');
+            setTimeout(() => {
+                elements[elements.length - 1].classList.remove('pow-effect');
+            }, 500);
         }
         
         // Add an image element with the uploaded file
@@ -769,9 +952,8 @@
                 zIndex: page.elements.length + 1,
                 rotation: rotation,
                 effects: {
-                    paperEffect: true,
-                    polaroid: true,
-                    tape: false
+                    comicPanel: true,
+                    speechBubble: false
                 }
             };
             
@@ -780,6 +962,13 @@
             
             // Select the newly added element
             selectElement(page.elements.length - 1);
+            
+            // Add POW effect
+            const elements = document.querySelectorAll('.draggable-element');
+            elements[elements.length - 1].classList.add('pow-effect');
+            setTimeout(() => {
+                elements[elements.length - 1].classList.remove('pow-effect');
+            }, 500);
         }
         
         // Add a sticker element to the current page
@@ -1351,36 +1540,42 @@
         
         // Save scrapbook data to server
         function saveScrapbook() {
-            // Update title and privacy from form inputs
-            scrapbookData.title = document.getElementById('scrapbook-title').value;
-            scrapbookData.privacy = document.getElementById('scrapbook-privacy').value;
-            
-            // Send the data to server
-            fetch('/api/save-scrapbook', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(scrapbookData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update the scrapbook ID if it's new
-                    if (data.scrapbook_id) {
-                        document.getElementById('scrapbook-id').value = data.scrapbook_id;
-                        scrapbookData._id = data.scrapbook_id;
-                    }
-                    alert('Scrapbook saved successfully!');
-                } else {
-                    alert('Error saving scrapbook: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while saving the scrapbook.');
-            });
+    // Update title and privacy from form inputs
+    scrapbookData.title = document.getElementById('scrapbook-title').value;
+    scrapbookData.privacy = document.getElementById('scrapbook-privacy').value;
+    
+    console.log("Saving scrapbook data:", scrapbookData); // Add this line to see what's being sent
+    
+    // Send the data to server
+    fetch('/api/scrapbook/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scrapbookData)
+    })
+    .then(response => {
+        console.log("Response status:", response.status); // Add this line
+        return response.json();
+    })
+    .then(data => {
+        console.log("Server response:", data); // Add this line
+        if (data.success) {
+            // Update the scrapbook ID if it's new
+            if (data.scrapbook_id) {
+                document.getElementById('scrapbook-id').value = data.scrapbook_id;
+                scrapbookData._id = data.scrapbook_id;
+            }
+            alert('Scrapbook saved successfully!');
+        } else {
+            alert('Error saving scrapbook: ' + data.message);
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving the scrapbook.');
+    });
+}
         
         // Initialize the editor
         function initEditor() {

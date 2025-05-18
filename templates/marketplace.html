@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paws - Marketplace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #FF5722;
+      --secondary-color: #2196F3;
+      --accent-color: #FFEB3B;
+      --dark-color: #1A1A1A;
+      --light-color: #FFFFFF;
+      --bg-color: #FFF9C4;
+      --card-shadow: 8px 8px 0 var(--dark-color);
+      --hover-shadow: 12px 12px 0 var(--dark-color);
+    }
+
+    body {
+      font-family: 'Comic Neue', cursive;
+      background-color: var(--bg-color);
+      color: var(--accent-color);
+      padding: 20px;
+      background-image: 
+        radial-gradient(circle, var(--primary-color) 2px, transparent 3px),
+        radial-gradient(circle, var(--secondary-color) 2px, transparent 3px);
+      background-size: 60px 60px;
+      background-position: 0 0, 30px 30px;
+    }
+
+    .comic-border {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      border: 8px solid var(--dark-color);
+      border-radius: 2px;
+      box-shadow: 
+        0 0 0 8px var(--light-color),
+        0 0 0 16px var(--dark-color);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      background-color: var(--light-color);
+      border: 4px solid var(--dark-color);
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .header h1 {
+      font-family: 'Bangers', cursive;
+      font-size: 3.5rem;
+      color: var(--primary-color);
+      text-shadow: 4px 4px 0 var(--dark-color);
+      -webkit-text-stroke: 2px var(--dark-color);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.3rem;
+      background-color: var(--accent-color);
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 30px;
+      border: 3px solid var(--dark-color);
+      box-shadow: 5px 5px 0 var(--dark-color);
+    }
+
+    .section-title {
+      font-family: 'Bangers', cursive;
+      font-size: 2.5rem;
+      color: var(--secondary-color);
+      text-shadow: 3px 3px 0 var(--dark-color);
+      -webkit-text-stroke: 1px var(--dark-color);
+      margin: 30px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px dashed var(--dark-color);
+    }
+
+    /* Shops Grid */
+    .shops-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .shop-card {
+      background-color: var(--light-color);
+      border: 4px solid var(--dark-color);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .shop-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .shop-image-container {
+      height: 200px;
+      overflow: hidden;
+      border-bottom: 4px solid var(--dark-color);
+      position: relative;
+    }
+
+    .shop-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .shop-card:hover .shop-image {
+      transform: scale(1.1);
+    }
+
+    .shop-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: var(--accent-color);
+      color: var(--dark-color);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+      border: 2px solid var(--dark-color);
+      box-shadow: 3px 3px 0 var(--dark-color);
+    }
+
+    .shop-info {
+      padding: 20px;
+    }
+
+    .shop-name {
+      font-family: 'Bangers', cursive;
+      font-size: 1.8rem;
+      color: var(--secondary-color);
+      margin-bottom: 10px;
+      -webkit-text-stroke: 1px var(--dark-color);
+      letter-spacing: 1px;
+    }
+
+    .shop-description {
+      margin-bottom: 15px;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .shop-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .shop-owner {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .view-products-btn {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: var(--light-color);
+      padding: 10px 20px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      border: 3px solid var(--dark-color);
+      box-shadow: 3px 3px 0 var(--dark-color);
+      transition: all 0.2s ease;
+      font-family: 'Comic Neue', cursive;
+      cursor: pointer;
+    }
+
+    .view-products-btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-3px);
+      box-shadow: 5px 5px 0 var(--dark-color);
+    }
+
+    /* Products Grid */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 25px;
+      margin: 30px 0;
+    }
+
+    .product-card {
+      background-color: var(--light-color);
+      border: 4px solid var(--dark-color);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px) rotate(-1deg);
+      box-shadow: var(--hover-shadow);
+    }
+
+    .product-image-container {
+      height: 200px;
+      overflow: hidden;
+      border-bottom: 4px solid var(--dark-color);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-image {
+      transform: scale(1.1);
+    }
+
+    .product-info {
+      padding: 15px;
+    }
+
+    .product-name {
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+      -webkit-text-stroke: 1px var(--dark-color);
+      letter-spacing: 1px;
+    }
+
+    .product-description {
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .product-price {
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: var(--secondary-color);
+      margin-bottom: 15px;
+    }
+
+    .product-shop {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .add-to-cart-btn {
+      display: inline-block;
+      background-color: var(--accent-color);
+      color: var(--dark-color);
+      padding: 8px 15px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      border: 3px solid var(--dark-color);
+      box-shadow: 3px 3px 0 var(--dark-color);
+      transition: all 0.2s ease;
+      font-family: 'Comic Neue', cursive;
+      cursor: pointer;
+    }
+
+    .add-to-cart-btn:hover {
+      background-color: var(--primary-color);
+      color: var(--light-color);
+      transform: translateY(-2px);
+      box-shadow: 5px 5px 0 var(--dark-color);
+    }
+
+    /* Back button */
+    .back-to-shops {
+      display: inline-block;
+      background-color: var(--secondary-color);
+      color: var(--light-color);
+      padding: 10px 20px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      border: 3px solid var(--dark-color);
+      box-shadow: 3px 3px 0 var(--dark-color);
+      transition: all 0.2s ease;
+      font-family: 'Comic Neue', cursive;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    .back-to-shops:hover {
+      background-color: var(--primary-color);
+      transform: translateY(-3px);
+      box-shadow: 5px 5px 0 var(--dark-color);
+    }
+
+    /* FAB Button */
+    .fixed-action-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 100;
+    }
+
+    .btn-floating {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.3s ease;
+      border: 4px solid var(--dark-color);
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    }
+
+    .btn-floating:active {
+      transform: translate(3px, 3px);
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+
+    .fixed-action-btn ul {
+      position: absolute;
+      bottom: 80px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      list-style: none;
+    }
+
+    .fixed-action-btn.active ul {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .fixed-action-btn.active .btn-floating {
+      transform: rotate(15deg);
+    }
+
+    .menu-option {
+      background: var(--light-color);
+      color: black;
+      padding: 10px 15px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: inline-block;
+      border: 3px solid var(--dark-color);
+      box-shadow: 3px 3px 0 var(--dark-color);
+      font-family: 'Comic Neue', cursive;
+    }
+
+    .menu-option:hover {
+      background: #e0f7fa;
+      transform: scale(1.05);
+    }
+
+    .menu-option:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--dark-color);
+    }
+
+    .paw-icon {
+      width: 45px;
+      height: 45px;
+      transition: transform 0.3s ease;
+    }
+
+    .icons {
+      width: 30px;
+      height: 30px;
+      border-radius: 100%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .action-label {
+      position: absolute;
+      background: var(--light-color);
+      border: 3px solid var(--dark-color);
+      padding: 5px 10px;
+      font-family: 'Bangers', cursive;
+      font-size: 18px;
+      color: var(--dark-color);
+      border-radius: 10px;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .btn-floating:hover .action-label {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2.5rem;
+      }
+      
+      .shops-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+      
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .shops-grid, .products-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn-floating {
+        width: 60px;
+        height: 60px;
+      }
+
+      .paw-icon {
+        width: 35px;
+        height: 35px;
+      }
+
+      .menu-option {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="comic-border"></div>
+  
+  <div class="header">
+    <h1>PAWS MARKETPLACE</h1>
+    <p>Find awesome pet products from our sellers!</p>
+  </div>
+
+  <h2 class="section-title">Featured Shops</h2>
+  <div class="shops-grid" id="shops-container">
+    {% for shop in shops %}
+    <div class="shop-card">
+      <div class="shop-image-container">
+        <img src="{{ url_for('static', filename='uploads/' + (shop.image if shop.image else 'default-shop.jpg')) }}" 
+             alt="{{ shop.name }}" class="shop-image">
+        <span class="shop-badge">{{ shop.product_count }} product{% if shop.product_count != 1 %}s{% endif %}</span>
+      </div>
+      <div class="shop-info">
+        <h3 class="shop-name">{{ shop.name }}</h3>
+        <p class="shop-description">{{ shop.description or "No description available" }}</p>
+        <div class="shop-meta">
+          <span class="shop-owner">By: {{ shop.owner_name }}</span>
+          <button class="view-products-btn" data-seller-id="{{ shop._id }}">View Products</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="section-title">Featured Products</h2>
+  <div class="products-grid" id="featured-products">
+    {% for product in featured_products %}
+    <div class="product-card">
+      <div class="product-image-container">
+        <img src="{{ url_for('static', filename='uploads/' + (product.image if product.image else 'default-product.jpg')) }}" 
+             alt="{{ product.name }}" class="product-image">
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-description">{{ product.description or "No description available" }}</p>
+        <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+        <p class="product-shop">From: {{ product.shop_name }}</p>
+        <button class="add-to-cart-btn" data-product-id="{{ product._id }}">Add to Cart</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Products by Seller (hidden by default) -->
+  <div id="products-by-seller" style="display: none;">
+    <button class="back-to-shops" id="back-to-shops">← Back to Shops</button>
+    <h2 class="section-title" id="seller-products-title">Shop Products</h2>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <!-- FAB Button -->
+  <div class="fixed-action-btn spin-close">
+    <a class="btn-floating">
+      <img src="{{ url_for('static', filename='images/paw.png') }}" alt="Menu" class="paw-icon">
+      <span class="action-label">MENU!</span>
+    </a>
+    <ul>
+      <li>
+        <a href="{{ url_for('home') }}" class="menu-option">
+          <img src="{{ url_for('static', filename='images/home.png') }}" class="icons"> HOME
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('profile', username=session.get('username', '')) }}" class="menu-option">
+          <img src="{{ url_for('static', filename='images/profile.png') }}" class="icons"> PROFILE
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('cart') }}" class="menu-option">
+          <img src="{{ url_for('static', filename='images/cart.png') }}" class="icons"> CART
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // FAB Button functionality
+      const fab = document.querySelector('.fixed-action-btn');
+      const fabButton = fab.querySelector('.btn-floating');
+
+      fabButton.addEventListener('click', function () {
+        fab.classList.toggle('active');
+        
+        if (fab.classList.contains('active')) {
+          fabButton.style.transition = 'all 0.3s ease';
+          fabButton.style.transform = 'scale(1.1)';
+          
+          setTimeout(() => {
+            fabButton.style.transform = 'rotate(15deg)';
+          }, 100);
+        } else {
+          fabButton.style.transform = 'scale(1)';
+        }
+      });
+
+      // Shop and product functionality
+      const shopsContainer = document.getElementById('shops-container');
+      const featuredProducts = document.getElementById('featured-products');
+      const productsBySeller = document.getElementById('products-by-seller');
+      const productsGrid = document.getElementById('products-grid');
+      const sellerProductsTitle = document.getElementById('seller-products-title');
+      const backToShopsBtn = document.getElementById('back-to-shops');
+      
+      // View products button click handler
+      document.querySelectorAll('.view-products-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const sellerId = this.getAttribute('data-seller-id');
+          const shopName = this.closest('.shop-card').querySelector('.shop-name').textContent;
+          fetchProducts(sellerId, shopName);
+        });
+      });
+
+      // Back to shops button click handler
+      backToShopsBtn.addEventListener('click', function() {
+        shopsContainer.style.display = 'grid';
+        featuredProducts.style.display = 'grid';
+        productsBySeller.style.display = 'none';
+      });
+
+      // Function to fetch products by seller
+      function fetchProducts(sellerId, shopName) {
+        fetch(`/api/sellers/${sellerId}/products`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              showProducts(data.products, shopName);
+            } else {
+              console.error('Error fetching products:', data.message);
+              alert('Failed to load products');
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+
+      // Function to show products for a specific seller
+      function showProducts(products, shopName) {
+        shopsContainer.style.display = 'none';
+        featuredProducts.style.display = 'none';
+        productsBySeller.style.display = 'block';
+        sellerProductsTitle.textContent = `Products from ${shopName}`;
+        
+        // Clear previous products
+        productsGrid.innerHTML = '';
+        
+        // Add products for the selected seller
+        products.forEach(product => {
+          const productCard = document.createElement('div');
+          productCard.className = 'product-card';
+          productCard.innerHTML = `
+            <div class="product-image-container">
+              <img src="{{ url_for('static', filename='uploads/') }}${product.image || 'default-product.jpg'}" 
+                   alt="${product.name}" class="product-image">
+            </div>
+            <div class="product-info">
+              <h3 class="product-name">${product.name}</h3>
+              <p class="product-description">${product.description || 'No description available'}</p>
+              <p class="product-price">$${product.price.toFixed(2)}</p>
+              <button class="add-to-cart-btn" data-product-id="${product._id}">Add to Cart</button>
+            </div>
+          `;
+          productsGrid.appendChild(productCard);
+        });
+
+        // Add event listeners to the new Add to Cart buttons
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            addToCart(productId);
+          });
+        });
+      }
+
+      // Function to add product to cart
+      function addToCart(productId) {
+        fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ product_id: productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Product added to cart!');
+          } else {
+            alert('Error: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to add to cart');
+        });
+      }
+    });
+  </script>
+</body>
+</html>
