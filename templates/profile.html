@@ -276,7 +276,7 @@
         }
 
         .scrapbook-img-hover {
-            height: 220px;
+            height: 271px;
             background-size: cover;
             background-position: center;
             border-bottom: 3px solid #000;
@@ -964,26 +964,12 @@
                             <div class="scrapbook-info">
                                 <span class="scrapbook-category">SCRAPBOOK • {{ sb.pages|length }} PAGES</span>
                                 <h3 class="scrapbook-title">{{ sb.title }}</h3>
-                                <p class="scrapbook-description">
-                                    {% if sb.get('description') %}
-                                        {{ sb.description|truncate(100) }}
-                                    {% else %}
-                                        A creative collection of memories and ideas.
-                                    {% endif %}
-                                </p>
+                                
                                 <span class="scrapbook-by">CREATED ON <span class="scrapbook-time">{{ sb.get('created_at', '')|format_date }}</span></span>
                             </div>
                         </a>
                         
-                        {% if session.get("user_id") == user._id|string %}
-                        <div class="scrapbook-actions">
-                            <button class="delete-scrapbook-btn" 
-                                    data-scrapbook-id="{{ sb._id }}" 
-                                    data-scrapbook-title="{{ sb.title }}">
-                                DELETE
-                            </button>
-                        </div>
-                        {% endif %}
+                      
                     </article>
                     {% endif %}
                 {% endfor %}
