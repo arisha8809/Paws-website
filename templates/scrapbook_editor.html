@@ -1030,7 +1030,20 @@
                 elementDiv.style.height = `${element.size.height}px`;
                 elementDiv.style.zIndex = element.zIndex;
                 elementDiv.style.setProperty('--rotation', `${element.rotation}deg`);
-                
+                if (element.type === 'image' || element.type === 'sticker') {
+    const img = document.createElement('img');
+    img.src = element.content;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'contain';
+
+    // Add comic style effect if sticker
+    if (element.type === 'sticker') {
+        img.classList.add('sticker-outline');
+    }
+
+    elementDiv.appendChild(img);
+}
                 // Add element controls
                 const controls = document.createElement('div');
                 controls.className = 'element-controls';
