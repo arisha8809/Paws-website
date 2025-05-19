@@ -152,7 +152,6 @@ def login():
     
     return jsonify({'success': False, 'message': 'Invalid username or password.'})
     
-    return jsonify({'success': False, 'message': 'Invalid username or password.'})
 @app.route('/create_profile/<profile_type>', methods=['GET', 'POST'])
 def create_profile(profile_type):
     if request.method == 'GET':
@@ -189,7 +188,10 @@ def create_profile(profile_type):
     session['user_id'] = str(result.inserted_id)
     session['username'] = username
     session['profile_type'] = profile_type
-    return jsonify({'success': True, 'redirect': url_for('home')})
+    
+    # Determine redirect URL based on profile type
+    redirect_url = url_for('home_seller') if profile_type == 'seller' else url_for('home')
+    return jsonify({'success': True, 'redirect': redirect_url})
 
 @app.route('/home')
 def home():
